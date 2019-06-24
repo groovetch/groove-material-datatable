@@ -1,0 +1,23 @@
+# Don't check auto-generated stuff into git
+coverage
+build
+compressed
+node_modules
+
+# Cruft
+.DS_Store
+npm-debug.log
+.idea
+
+# Yarn/npm
+package-lock.json
+yarn.lock
+yarn-error.log
+
+# Ide
+.vscode
+
+# Other
+.prettierrc
+.prettierignore
+.note
