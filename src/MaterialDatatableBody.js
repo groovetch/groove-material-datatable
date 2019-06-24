@@ -120,6 +120,7 @@ class MaterialDatatableBody extends React.Component {
                                         rowIndex={rowIndex}
                                         colIndex={index}
                                         columnHeader={columns[index].name}
+                                        bodyStyles={columns[index].bodyStyles}
                                         options={options}
                                         key={index}>
                                         {column}

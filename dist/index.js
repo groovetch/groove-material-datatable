@@ -1503,7 +1503,8 @@ var MaterialDatatableBodyCell = function (_React$Component) {
                 options = _props.options,
                 dataIndex = _props.dataIndex,
                 rowIndex = _props.rowIndex,
-                otherProps = objectWithoutProperties(_props, ["children", "classes", "colIndex", "columnHeader", "options", "dataIndex", "rowIndex"]);
+                bodyStyles = _props.bodyStyles,
+                otherProps = objectWithoutProperties(_props, ["children", "classes", "colIndex", "columnHeader", "options", "dataIndex", "rowIndex", "bodyStyles"]);
 
 
             return [React.createElement(
@@ -1517,6 +1518,7 @@ var MaterialDatatableBodyCell = function (_React$Component) {
                 _extends({
                     key: 2,
                     onClick: this.handleClick,
+                    style: _extends({}, bodyStyles),
                     className: classNames((_classNames2 = {}, defineProperty(_classNames2, classes.root, true), defineProperty(_classNames2, classes.responsiveStacked, options.responsive === "stacked"), _classNames2))
                 }, otherProps),
                 children
@@ -1753,6 +1755,7 @@ var MaterialDatatableBody = function (_React$Component) {
                                     rowIndex: rowIndex,
                                     colIndex: index,
                                     columnHeader: columns[index].name,
+                                    bodyStyles: columns[index].bodyStyles,
                                     options: options,
                                     key: index },
                                 column
@@ -2051,8 +2054,7 @@ var MaterialDatatableHeadCell = function (_React$Component) {
                 options = _props.options,
                 sortDirection = _props.sortDirection,
                 sort = _props.sort,
-                width = _props.width,
-                headerNoWrap = _props.headerNoWrap;
+                headStyles = _props.headStyles;
 
             var sortActive = sortDirection !== null && sortDirection !== undefined ? true : false;
             var sortLabelProps = _extends({
@@ -2064,7 +2066,7 @@ var MaterialDatatableHeadCell = function (_React$Component) {
                 {
                     className: classes.root,
                     scope: "col",
-                    style: { width: width, whiteSpace: headerNoWrap !== null && headerNoWrap === true ? "nowrap" : "normal" },
+                    style: _extends({}, headStyles),
                     sortDirection: sortDirection },
                 options.sort && sort ? React.createElement(
                     Tooltip,
@@ -2180,8 +2182,7 @@ var MaterialDatatableHead = function (_React$Component) {
                                     return setCellRef(index + 1, reactDom.findDOMNode(el));
                                 },
                                 sort: column.sort,
-                                width: column.width,
-                                headerNoWrap: column.headerNoWrap,
+                                headStyles: column.headStyles,
                                 sortDirection: column.sortDirection,
                                 toggleSort: _this2.handleToggleColumn,
                                 options: options },

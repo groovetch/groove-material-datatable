@@ -57,7 +57,7 @@ class MaterialDatatableHeadCell extends React.Component {
     };
 
     render() {
-        const {children, classes, options, sortDirection, sort, width, headerNoWrap} = this.props;
+        const {children, classes, options, sortDirection, sort, headStyles} = this.props;
         const sortActive = sortDirection !== null && sortDirection !== undefined ? true : false;
         const sortLabelProps = {
             active: sortActive,
@@ -68,7 +68,7 @@ class MaterialDatatableHeadCell extends React.Component {
             <TableCell
                 className={classes.root}
                 scope={"col"}
-                style={{width: width, whiteSpace: headerNoWrap !== null && headerNoWrap === true ? "nowrap" : "normal"}}
+                style={{...headStyles}}
                 sortDirection={sortDirection}>
                 {options.sort && sort ? (
                     <Tooltip

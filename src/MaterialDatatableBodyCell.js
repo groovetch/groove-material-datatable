@@ -40,7 +40,7 @@ class MaterialDatatableBodyCell extends React.Component {
     };
 
     render() {
-        const {children, classes, colIndex, columnHeader, options, dataIndex, rowIndex, ...otherProps} = this.props;
+        const {children, classes, colIndex, columnHeader, options, dataIndex, rowIndex, bodyStyles, ...otherProps} = this.props;
 
         return [
             <TableCell
@@ -55,6 +55,7 @@ class MaterialDatatableBodyCell extends React.Component {
             <TableCell
                 key={2}
                 onClick={this.handleClick}
+                style={{...bodyStyles}}
                 className={classNames({
                     [classes.root]: true,
                     [classes.responsiveStacked]: options.responsive === "stacked",

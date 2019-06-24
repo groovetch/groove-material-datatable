@@ -66,8 +66,7 @@ class MaterialDatatableHead extends React.Component {
                                     type={"cell"}
                                     ref={el => setCellRef(index + 1, findDOMNode(el))}
                                     sort={column.sort}
-                                    width={column.width}
-                                    headerNoWrap={column.headerNoWrap}
+                                    headStyles={column.headStyles}
                                     sortDirection={column.sortDirection}
                                     toggleSort={this.handleToggleColumn}
                                     options={options}>
