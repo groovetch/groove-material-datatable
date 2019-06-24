@@ -792,7 +792,7 @@ var MaterialDatatableViewCol = function (_React$Component) {
                     FormGroup,
                     { className: classes.formGroup },
                     columns.map(function (column, index) {
-                        return column.display !== "excluded" && React.createElement(FormControlLabel, {
+                        return column.display !== "excluded" && !column.noViewCol && React.createElement(FormControlLabel, {
                             key: index,
                             classes: {
                                 root: classes.formControl,
@@ -2092,7 +2092,7 @@ var MaterialDatatableHeadCell = function (_React$Component) {
                         React.createElement(
                             "div",
                             { className: classes.sortAction },
-                            React.createElement(TableSortLabel, sortLabelProps)
+                            options.customSortLabelRender ? options.customSortLabelRender(sortLabelProps) : React.createElement(TableSortLabel, sortLabelProps)
                         )
                     )
                 ) : children
