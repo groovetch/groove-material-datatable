@@ -1732,7 +1732,7 @@ var MaterialDatatableBody = function (_React$Component) {
             return React.createElement(
                 TableBody,
                 null,
-                tableRows ? tableRows.map(function (_ref2, rowIndex) {
+                tableRows instanceof Array && tableRows.length > 0 ? tableRows.map(function (_ref2, rowIndex) {
                     var row = _ref2.data,
                         dataIndex = _ref2.dataIndex,
                         dataObject = _ref2.dataObject;
@@ -1775,7 +1775,7 @@ var MaterialDatatableBody = function (_React$Component) {
                         React.createElement(
                             Typography,
                             { variant: "subtitle1", className: classes.emptyTitle },
-                            options.textLabels.body.noMatch
+                            options.noDataLabel || options.textLabels.body.noMatch
                         )
                     )
                 )

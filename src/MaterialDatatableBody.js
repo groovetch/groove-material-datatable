@@ -100,7 +100,7 @@ class MaterialDatatableBody extends React.Component {
 
         return (
             <TableBody>
-                {tableRows ? (
+                {tableRows instanceof Array && tableRows.length > 0 ? (
                     tableRows.map(({data: row, dataIndex, dataObject}, rowIndex) => (
                         <MaterialDatatableBodyRow
                             options={options}
@@ -136,7 +136,7 @@ class MaterialDatatableBody extends React.Component {
                             colIndex={0}
                             rowIndex={0}>
                             <Typography variant="subtitle1" className={classes.emptyTitle}>
-                                {options.textLabels.body.noMatch}
+                                {options.noDataLabel || options.textLabels.body.noMatch}
                             </Typography>
                         </MaterialDatatableBodyCell>
                     </MaterialDatatableBodyRow>
