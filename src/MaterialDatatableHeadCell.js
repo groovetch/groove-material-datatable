@@ -91,7 +91,11 @@ class MaterialDatatableHeadCell extends React.Component {
                 {children}
               </div>
               <div className={classes.sortAction}>
-                <TableSortLabel {...sortLabelProps} />
+                {options.customSortLabelRender ? (
+                  options.customSortLabelRender(sortLabelProps)
+                ) : (
+                  <TableSortLabel {...sortLabelProps} />
+                )}
               </div>
             </span>
                     </Tooltip>
