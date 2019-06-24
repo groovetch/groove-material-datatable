@@ -68,7 +68,7 @@ class MaterialDatatableViewCol extends React.Component {
                 <FormGroup className={classes.formGroup}>
                     {columns.map((column, index) => {
                         return (
-                            column.display !== "excluded" && (
+                            column.display !== "excluded" && !column.noViewCol && (
                                 <FormControlLabel
                                     key={index}
                                     classes={{
