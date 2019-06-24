@@ -136,7 +136,7 @@ class MaterialDatatableBody extends React.Component {
                             colIndex={0}
                             rowIndex={0}>
                             <Typography variant="subtitle1" className={classes.emptyTitle}>
-                                {options.noDataLabel || options.textLabels.body.noMatch}
+                                {options.noDataIndicator || options.textLabels.body.noMatch}
                             </Typography>
                         </MaterialDatatableBodyCell>
                     </MaterialDatatableBodyRow>

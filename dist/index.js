@@ -1775,7 +1775,7 @@ var MaterialDatatableBody = function (_React$Component) {
                         React.createElement(
                             Typography,
                             { variant: "subtitle1", className: classes.emptyTitle },
-                            options.noDataLabel || options.textLabels.body.noMatch
+                            options.noDataIndicator || options.textLabels.body.noMatch
                         )
                     )
                 )
