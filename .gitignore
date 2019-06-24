@@ -3,6 +3,7 @@ coverage
 build
 compressed
 node_modules
+dist
 
 # Cruft
 .DS_Store
