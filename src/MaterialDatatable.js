@@ -143,6 +143,7 @@ class MaterialDatatable extends React.Component {
     constructor(props) {
         super(props);
         this.tableRef = false;
+        this.tableContent = React.createRef();
         this.headCellRefs = {};
         this.setHeadResizeable = () => {
         };
@@ -921,7 +922,7 @@ class MaterialDatatable extends React.Component {
                 searchText={this.state.searchText}
                 resetFilters={this.resetFilters}
                 searchTextUpdate={this.searchTextUpdate}
-                tableRef={() => this.tableContent}
+                tableRef={this.getTableContentRef}
                 title={title}
                 toggleViewColumn={this.toggleViewColumn}
             />
@@ -936,7 +937,7 @@ class MaterialDatatable extends React.Component {
 
         return (
             <div
-                ref={el => (this.tableContent = el)}
+                ref={this.tableContent}
                 style={{position: "relative"}}
                 className={this.options.responsive === "scroll" ? classes.responsiveScroll : null}>
                 {this.options.resizableColumns && (
@@ -1020,6 +1021,10 @@ class MaterialDatatable extends React.Component {
             </div>
         );
     }
+
+    getTableContentRef = () => {
+      return this.tableContent.current;
+    };
 
     render() {
         const {classes} = this.props;
