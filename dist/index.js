@@ -2689,7 +2689,12 @@ var MaterialDatatable$1 = function (_React$Component) {
             }
         };
 
+        _this.getTableContentRef = function () {
+            return _this.tableContent.current;
+        };
+
         _this.tableRef = false;
+        _this.tableContent = React.createRef();
         _this.headCellRefs = {};
         _this.setHeadResizeable = function () {};
         return _this;
@@ -3149,8 +3154,6 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "renderTableToolbar",
         value: function renderTableToolbar() {
-            var _this5 = this;
-
             var title = this.props.title;
             var _state = this.state,
                 columns = _state.columns,
@@ -3173,9 +3176,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                 searchText: this.state.searchText,
                 resetFilters: this.resetFilters,
                 searchTextUpdate: this.searchTextUpdate,
-                tableRef: function tableRef() {
-                    return _this5.tableContent;
-                },
+                tableRef: this.getTableContentRef,
                 title: title,
                 toggleViewColumn: this.toggleViewColumn
             });
@@ -3183,7 +3184,7 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "renderTable",
         value: function renderTable() {
-            var _this6 = this;
+            var _this5 = this;
 
             var _props = this.props,
                 classes = _props.classes,
@@ -3204,18 +3205,16 @@ var MaterialDatatable$1 = function (_React$Component) {
             return React.createElement(
                 "div",
                 {
-                    ref: function ref(el) {
-                        return _this6.tableContent = el;
-                    },
+                    ref: this.tableContent,
                     style: { position: "relative" },
                     className: this.options.responsive === "scroll" ? classes.responsiveScroll : null },
                 this.options.resizableColumns && React.createElement(MaterialDatatableResize$1, { key: rowCount, setResizeable: function setResizeable(fn) {
-                        return _this6.setHeadResizeable = fn;
+                        return _this5.setHeadResizeable = fn;
                     } }),
                 React.createElement(
                     Table,
                     { ref: function ref(el) {
-                            return _this6.tableRef = el;
+                            return _this5.tableRef = el;
                         }, tabIndex: "0", role: "grid" },
                     React.createElement(
                         "caption",
@@ -3230,12 +3229,12 @@ var MaterialDatatable$1 = function (_React$Component) {
                         page: page,
                         rowsPerPage: rowsPerPage,
                         handleHeadUpdateRef: function handleHeadUpdateRef(fn) {
-                            return _this6.updateToolbarSelect = fn;
+                            return _this5.updateToolbarSelect = fn;
                         },
                         selectedRows: selectedRows,
                         selectRowUpdate: this.selectRowUpdate,
                         toggleSort: function toggleSort(index) {
-                            return _this6.toggleSortColumn(index);
+                            return _this5.toggleSortColumn(index);
                         },
                         setCellRef: this.setHeadCellRef,
                         options: this.options
@@ -3294,7 +3293,7 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "renderLiveAnnounce",
         value: function renderLiveAnnounce() {
-            var _this7 = this;
+            var _this6 = this;
 
             var classes = this.props.classes;
             var announceText = this.state.announceText;
@@ -3303,7 +3302,7 @@ var MaterialDatatable$1 = function (_React$Component) {
             return React.createElement(
                 "div",
                 { className: classes.liveAnnounce, "aria-live": "polite", ref: function ref(el) {
-                        return _this7.announceRef = el;
+                        return _this6.announceRef = el;
                     } },
                 announceText
             );
