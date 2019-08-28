@@ -22,6 +22,8 @@ export interface MaterialDatatableColumnOptions {
 export interface MaterialDatatableOptions {
     page?: number
     count?: number
+    hasStickyColumn?: boolean
+    stickyColumns?: any[]
     serverSide?: boolean
     filterList?: any[]
     rowsSelected?: any[]

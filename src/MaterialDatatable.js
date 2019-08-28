@@ -69,6 +69,8 @@ class MaterialDatatable extends React.Component {
         ).isRequired,
         /** Options used to describe table */
         options: PropTypes.shape({
+            hasStickyColumn: PropTypes.bool,
+            stickyColumns: PropTypes.array,
             responsive: PropTypes.oneOf(["stacked", "scroll"]),
             filterType: PropTypes.oneOf(["dropdown", "checkbox", "multiselect"]),
             textLabels: PropTypes.object,
@@ -159,12 +161,20 @@ class MaterialDatatable extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.data !== nextProps.data || this.props.columns !== nextProps.columns) {
-            if (this.props.options === undefined || this.props.options.componentWillReceiveProps === undefined || this.props.options.componentWillReceiveProps === true) {
-                this.initializeTable(nextProps);
-                this.setInitialSort(nextProps);
-            }
-        }
+      if (this.props.data !== nextProps.data || this.props.columns !== nextProps.columns) {
+          if (this.props.options === undefined || this.props.options.componentWillReceiveProps === undefined || this.props.options.componentWillReceiveProps === true) {
+              this.initializeTable(nextProps);
+              this.setInitialSort(nextProps);
+          }
+      }else {
+        /* Force reinit the table when `hasStickyColumn` is enabled */
+        if (
+          this.props.options.hasStickyColumn === true && this.props.options.stickyColumns.length > 0
+        ) {
+            this.initializeTable(nextProps);
+            this.setInitialSort(nextProps);
+          }
+      }
     }
 
     initializeTable(props) {
@@ -757,7 +767,7 @@ class MaterialDatatable extends React.Component {
                     if(this.options.selectableRows === false){
                         return prevState;
                     }
-                    
+
                     const {data} = prevState;
                     const selectedRowsLen = prevState.selectedRows.data.length;
                     const isDeselect = selectedRowsLen === data.length || (selectedRowsLen < data.length && selectedRowsLen > 0);
@@ -775,7 +785,7 @@ class MaterialDatatable extends React.Component {
                     }
 
                     const selectedDataIndexes = newRows.map(row=> row.dataIndex);
-                    
+
                     return {
                         curSelectedRows: newRows,
                         selectedRows: {
@@ -795,11 +805,11 @@ class MaterialDatatable extends React.Component {
         } else if (type === "cell") {
             this.setState(
                 prevState => {
-                    
+
                     if(this.options.selectableRows === false){
                         return prevState;
                     }
-                    
+
                     const {dataIndex} = value;
                     let selectedRows = [...prevState.selectedRows.data];
                     let rowPos = -1;
@@ -820,9 +830,9 @@ class MaterialDatatable extends React.Component {
                     } else {
                         selectedRows.push(value);
                     }
-                    
+
                     const selectedDataIndexes = selectedRows.map(row=> row.dataIndex);
-                    
+
                     return {
                         selectedRows: {
                             lookup: this.buildSelectedMap(selectedRows),

@@ -2719,6 +2719,12 @@ var MaterialDatatable$1 = function (_React$Component) {
                     this.initializeTable(nextProps);
                     this.setInitialSort(nextProps);
                 }
+            } else {
+                /* Force reinit the table when `hasStickyColumn` is enabled */
+                if (this.props.options.hasStickyColumn === true && this.props.options.stickyColumns.length > 0) {
+                    this.initializeTable(nextProps);
+                    this.setInitialSort(nextProps);
+                }
             }
         }
     }, {
