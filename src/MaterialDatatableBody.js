@@ -113,8 +113,10 @@ class MaterialDatatableBody extends React.Component {
                                 <MaterialDatatableSelectCell checked={this.isRowSelected(dataIndex)}/>
                             }
                             {row.map(
-                                (column, index) =>
-                                    columns[index].display === "true" &&
+                                (column, index) => {
+                                  if (columns[index] === undefined) return null;
+
+                                  return columns[index].display === "true" &&
                                     <MaterialDatatableBodyCell
                                         dataIndex={dataIndex}
                                         rowIndex={rowIndex}
@@ -125,6 +127,7 @@ class MaterialDatatableBody extends React.Component {
                                         key={index}>
                                         {column}
                                     </MaterialDatatableBodyCell>
+                                }
                             )}
                         </MaterialDatatableBodyRow>
                     ))

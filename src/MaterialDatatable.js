@@ -15,24 +15,36 @@ import textLabels from "./textLabels";
 import {withStyles} from "@material-ui/core/styles";
 
 const defaultTableStyles = {
-    root: {},
-    responsiveScroll: {
-        overflowX: "auto",
-    },
-    caption: {
-        position: "absolute",
-        left: "-1000px",
-    },
-    liveAnnounce: {
-        border: "0",
-        clip: "rect(0 0 0 0)",
-        height: "1px",
-        margin: "-1px",
-        overflow: "hidden",
-        padding: "0",
-        position: "absolute",
-        width: "1px",
-    },
+  root: {},
+  responsiveScroll: {
+      overflowX: "auto",
+  },
+  caption: {
+      position: "absolute",
+      left: "-1000px",
+  },
+  liveAnnounce: {
+      border: "0",
+      clip: "rect(0 0 0 0)",
+      height: "1px",
+      margin: "-1px",
+      overflow: "hidden",
+      padding: "0",
+      position: "absolute",
+      width: "1px",
+  },
+  overlayStickyTableSection: {
+    position: 'relative',
+    zIndex: 1,
+  },
+  overlayStickyTableWrapper: {
+    position: 'absolute',
+    width: 285,
+    left: 0,
+    top: 0,
+    backgroundColor: 'lightgreen',
+    overflowX: 'hidden'
+  }
 };
 
 const TABLE_LOAD = {
@@ -165,14 +177,6 @@ class MaterialDatatable extends React.Component {
           if (this.props.options === undefined || this.props.options.componentWillReceiveProps === undefined || this.props.options.componentWillReceiveProps === true) {
               this.initializeTable(nextProps);
               this.setInitialSort(nextProps);
-          }
-      }else {
-        /* Force reinit the table when `hasStickyColumn` is enabled */
-        if (
-          this.props.options.hasStickyColumn === true && this.props.options.stickyColumns.length > 0
-        ) {
-            this.initializeTable(nextProps);
-            this.setInitialSort(nextProps);
           }
       }
     }
@@ -416,6 +420,7 @@ class MaterialDatatable extends React.Component {
                 let funcResult = columns[index].customBodyRender(rowObjectData, tableMeta, this.updateDataCol.bind(null, rowIndex, index));
                 columnDisplay = funcResult;
                 columnValue = funcResult;
+                // console.log("TCL: MaterialDatatable -> computeDisplayRow -> columnValue", columnValue)
 
                 if (React.isValidElement(funcResult) && funcResult.props.value) {
                     columnValue = funcResult.props.value;
@@ -939,6 +944,59 @@ class MaterialDatatable extends React.Component {
         );
     }
 
+    renderStickyTable = () => {
+      const {classes, title, options: {hasStickyColumn, stickyColumns}} = this.props;
+      const {activeColumn, data, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
+      const rowCount = this.options.count || displayData.length;
+
+      const newStickyColumns = stickyColumns.map(fieldName => columns.filter( c => c.field === fieldName)[0]);
+
+      if (!hasStickyColumn || !newStickyColumns) return null;
+
+      const stickyData = this.getDisplayData(newStickyColumns, data, filterList, searchText);
+
+      return (
+        <div
+          ref={this.tableContent}
+          className={classes.overlayStickyTableSection}>
+          {this.options.resizableColumns && (
+              <MaterialDatatableResize key={rowCount} setResizeable={fn => (this.setHeadResizeable = fn)}/>
+          )}
+          <div className={classes.overlayStickyTableWrapper}>
+            <Table ref={el => (this.tableRef = el)} tabIndex={"0"} role={"grid"}>
+                <caption className={classes.caption}>{title}</caption>
+                <MaterialDatatableHead
+                    activeColumn={activeColumn}
+                    data={stickyData}
+                    count={rowCount}
+                    columns={newStickyColumns}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    handleHeadUpdateRef={fn => (this.updateToolbarSelect = fn)}
+                    selectedRows={selectedRows}
+                    selectRowUpdate={this.selectRowUpdate}
+                    toggleSort={(index) => this.toggleSortColumn(index)}
+                    setCellRef={this.setHeadCellRef}
+                    options={this.options}
+                />
+                <MaterialDatatableBody
+                    data={stickyData}
+                    count={rowCount}
+                    columns={newStickyColumns}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    selectedRows={selectedRows}
+                    selectRowUpdate={this.selectRowUpdate}
+                    options={this.options}
+                    searchText={searchText}
+                    filterList={filterList}
+                />
+            </Table>
+          </div>
+        </div>
+      );
+    }
+
     renderTable() {
         const {classes, title} = this.props;
         const {activeColumn, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
@@ -946,6 +1004,8 @@ class MaterialDatatable extends React.Component {
         const rowCount = this.options.count || displayData.length;
 
         return (
+          <React.Fragment>
+            {this.renderStickyTable()}
             <div
                 ref={this.tableContent}
                 style={{position: "relative"}}
@@ -957,7 +1017,7 @@ class MaterialDatatable extends React.Component {
                     <caption className={classes.caption}>{title}</caption>
                     <MaterialDatatableHead
                         activeColumn={activeColumn}
-                        data={this.state.displayData}
+                        data={displayData}
                         count={rowCount}
                         columns={columns}
                         page={page}
@@ -970,7 +1030,7 @@ class MaterialDatatable extends React.Component {
                         options={this.options}
                     />
                     <MaterialDatatableBody
-                        data={this.state.displayData}
+                        data={displayData}
                         count={rowCount}
                         columns={columns}
                         page={page}
@@ -983,6 +1043,7 @@ class MaterialDatatable extends React.Component {
                     />
                 </Table>
             </div>
+          </React.Fragment>
         );
     }
 
