@@ -9,10 +9,13 @@ import MaterialDatatableBody from "./MaterialDatatableBody";
 import MaterialDatatableResize from "./MaterialDatatableResize";
 import MaterialDatatableHead from "./MaterialDatatableHead";
 import MaterialDatatablePagination from "./MaterialDatatablePagination";
+import cx from "classnames";
+import debounce from "lodash.debounce";
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 import textLabels from "./textLabels";
 import {withStyles} from "@material-ui/core/styles";
+
 
 const defaultTableStyles = {
   root: {},
@@ -33,17 +36,33 @@ const defaultTableStyles = {
       position: "absolute",
       width: "1px",
   },
-  overlayStickyTableSection: {
+  tableSection: {
     position: 'relative',
     zIndex: 1,
+  },
+  tableTopToolbarSection: {
+    position: 'relative',
+    zIndex: '10',
+  },
+  overlayStickyTableSection: {
+    position: 'relative',
+    zIndex: 5,
   },
   overlayStickyTableWrapper: {
     position: 'absolute',
     width: 285,
     left: 0,
     top: 0,
-    backgroundColor: 'lightgreen',
-    overflowX: 'hidden'
+    backgroundColor: '#ffffff',
+    overflowX: 'hidden',
+    boxShadow: '1px 0px 2px -3px rgba(0,0,0,.2)',
+
+    '& thead tr': {
+      backgroundColor: 'white'
+    }
+  },
+  overlayStickyBackground: {
+    backgroundColor: '#fdfdfd',
   }
 };
 
@@ -133,25 +152,27 @@ class MaterialDatatable extends React.Component {
     };
 
     state = {
-        announceText: null,
-        activeColumn: null,
-        data: [],
-        displayData: [],
-        notModifiedDisplayData: [],
-        page: 0,
-        rowsPerPage: 10,
-        columns: [],
-        filterData: [],
-        filterList: [],
-        selectedRows: {
-            data: [],
-            lookup: {},
-        },
-        rowsSelected:[],
-        sortColumnIndex: null,
-        sortColumnDirection: null,
-        showResponsive: false,
-        searchText: null,
+      isShowingStickyTable: true,
+      isBackgroundStickyStatus: false,
+      announceText: null,
+      activeColumn: null,
+      data: [],
+      displayData: [],
+      notModifiedDisplayData: [],
+      page: 0,
+      rowsPerPage: 10,
+      columns: [],
+      filterData: [],
+      filterList: [],
+      selectedRows: {
+          data: [],
+          lookup: {},
+      },
+      rowsSelected:[],
+      sortColumnIndex: null,
+      sortColumnDirection: null,
+      showResponsive: false,
+      searchText: null,
     };
 
     constructor(props) {
@@ -167,10 +188,39 @@ class MaterialDatatable extends React.Component {
         this.initializeTable(this.props);
     }
 
+    onScrollLeftHandler = table => {
+        console.log('scrolled: ', table.scrollLeft);
+
+        if (table.scrollLeft > 0 && !this.state.isBackgroundStickyStatus) {
+          this.setState({
+            isBackgroundStickyStatus: true,
+          });
+        }
+
+        if (table.scrollLeft === 0) {
+          this.setState({
+            isBackgroundStickyStatus: false,
+          });
+        }
+    };
+
     componentDidMount() {
-        this.setHeadResizeable(this.headCellRefs, this.tableRef);
-        this.setInitialSort(this.props);
+      this.setHeadResizeable(this.headCellRefs, this.tableRef);
+      this.setInitialSort(this.props);
+
+      const tableDefault = document.querySelector('.table-section-default');
+      tableDefault.addEventListener('scroll',debounce(() => this.onScrollLeftHandler(tableDefault), 30));
     }
+
+    componentWillUnmount() {
+      const tableDefault = document.querySelector('.table-section-default');
+      tableDefault.removeEventListener('scroll', () => this.onScrollLeftHandler(tableDefault));
+
+      this.setState({
+        isBackgroundStickyStatus: false,
+      });
+    }
+
 
     componentWillReceiveProps(nextProps) {
       if (this.props.data !== nextProps.data || this.props.columns !== nextProps.columns) {
@@ -917,7 +967,7 @@ class MaterialDatatable extends React.Component {
     }
 
     renderTableToolbar() {
-        const {title} = this.props;
+        const {title, classes} = this.props;
         const {columns, filterData, filterList, selectedRows} = this.state;
 
         return this.options.showSelectedRowsToolbar && selectedRows.data.length ? (
@@ -925,6 +975,7 @@ class MaterialDatatable extends React.Component {
                 options={this.options}
                 selectedRows={selectedRows}
                 onRowsDelete={this.selectRowDelete}
+                className={cx(classes.tableTopToolbarSection)}
             />
         ) : (
             <MaterialDatatableToolbar
@@ -940,13 +991,14 @@ class MaterialDatatable extends React.Component {
                 tableRef={this.getTableContentRef}
                 title={title}
                 toggleViewColumn={this.toggleViewColumn}
+                className={cx(classes.tableTopToolbarSection)}
             />
         );
     }
 
     renderStickyTable = () => {
       const {classes, title, options: {hasStickyColumn, stickyColumns}} = this.props;
-      const {activeColumn, data, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
+      const { isBackgroundStickyStatus, activeColumn, data, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
       const rowCount = this.options.count || displayData.length;
 
       const newStickyColumns = stickyColumns.map(fieldName => columns.filter( c => c.field === fieldName)[0]);
@@ -958,11 +1010,19 @@ class MaterialDatatable extends React.Component {
       return (
         <div
           ref={this.tableContent}
-          className={classes.overlayStickyTableSection}>
+          className={cx({
+            'table-section-overlay': true,
+            [classes.overlayStickyTableSection]: true,
+          })
+          }>
           {this.options.resizableColumns && (
               <MaterialDatatableResize key={rowCount} setResizeable={fn => (this.setHeadResizeable = fn)}/>
           )}
-          <div className={classes.overlayStickyTableWrapper}>
+          <div className={cx({
+            [classes.overlayStickyTableWrapper]: true,
+            [classes.overlayStickyBackground]: isBackgroundStickyStatus,
+            'overlay-table-wrapper': true,
+          })}>
             <Table ref={el => (this.tableRef = el)} tabIndex={"0"} role={"grid"}>
                 <caption className={classes.caption}>{title}</caption>
                 <MaterialDatatableHead
@@ -999,7 +1059,7 @@ class MaterialDatatable extends React.Component {
 
     renderTable() {
         const {classes, title} = this.props;
-        const {activeColumn, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
+        const { activeColumn, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
 
         const rowCount = this.options.count || displayData.length;
 
@@ -1008,8 +1068,12 @@ class MaterialDatatable extends React.Component {
             {this.renderStickyTable()}
             <div
                 ref={this.tableContent}
-                style={{position: "relative"}}
-                className={this.options.responsive === "scroll" ? classes.responsiveScroll : null}>
+                className={cx({
+                  'table-section-default': true,
+                  [classes.tableSection]: true,
+                  [classes.responsiveScroll]: Boolean(this.options.responsive === "scroll")
+                })}
+              >
                 {this.options.resizableColumns && (
                     <MaterialDatatableResize key={rowCount} setResizeable={fn => (this.setHeadResizeable = fn)}/>
                 )}
