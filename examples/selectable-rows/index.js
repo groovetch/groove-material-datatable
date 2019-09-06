@@ -240,7 +240,18 @@ class Example extends React.Component {
             filterList: [[], [], ["Location 2"], [], [], [], []],
 
             onTableChange: (action, state) => this.onChange(state),
-            onRowClick: (rowObject) => this.handleOnClick(rowObject)
+            onRowClick: (rowObject) => this.handleOnClick(rowObject),
+            useOnRowHoverOverlay: true,
+            onRowHoverOverlayRender: (data, index) => {
+                return (
+                    <div
+                        style={{
+                            backgroundColor: 'rgba(100, 100, 0, 0.5)',
+                            height: 50,
+                        }}
+                    />
+                )
+            },
         };
 
         if (this.state.tableState !== undefined && this.state.tableState !== null) {

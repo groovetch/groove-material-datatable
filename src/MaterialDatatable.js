@@ -108,6 +108,8 @@ class MaterialDatatable extends React.Component {
                 filename: PropTypes.string,
                 separator: PropTypes.string,
             }),
+            useOnRowHoverOverlay: PropTypes.bool,
+            onRowHoverOverlayRender: PropTypes.func,
         }),
         /** Pass and use className to style MaterialDatatable as desired */
         className: PropTypes.string,
@@ -224,6 +226,8 @@ class MaterialDatatable extends React.Component {
                 filename: "tableDownload.csv",
                 separator: ",",
             },
+            useOnRowOverlay: false,
+            onRowOverlayRender: () => null,
         };
 
         this.options = merge(defaultOptions, props.options);

@@ -105,6 +105,9 @@ class MaterialDatatableBody extends React.Component {
                         <MaterialDatatableBodyRow
                             options={options}
                             rowSelected={this.isRowSelected(dataIndex)}
+                            rowIndex={rowIndex}
+                            row={row}
+                            dataObject={dataObject}
                             onClick={() => this.onRowClick(dataObject, {rowIndex, dataIndex})}
                             id={"MaterialDatatableBodyRow-" + dataIndex}
                             key={rowIndex}>
