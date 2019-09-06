@@ -17,20 +17,20 @@ const defaultBodyRowStyles = {
         }
     },
     rowDefault: {
-        '&:hover .duc': {
+        '&:hover .overlay-content-wrapper': {
             display: 'block'
         }
     },
-    actionRowWrapper: {
+    overlayContentWrapper: {
         display: 'none',
         position: 'relative',
         zIndex: 1,
     },
-    actionAbsolute: {
+    overlayContent: {
         position: 'absolute',
-        zIndex: 10,
         right: 0,
         top: 0,
+        zIndex: 10,
     }
 };
 
@@ -63,7 +63,7 @@ class MaterialDatatableBodyRow extends React.Component {
 
         return (
             <React.Fragment>
-                
+
                 <TableRow
                     hover={options.rowHover}
                     onClick={onClick}
@@ -79,11 +79,11 @@ class MaterialDatatableBodyRow extends React.Component {
                         options.useOnRowHoverOverlay && (
                             <td>
                                 <div className={classNames({
-                                    [classes.actionRowWrapper]: true,
-                                    'duc': true
+                                    [classes.overlayContentWrapper]: true,
+                                    'overlay-content-wrapper': true
                                 })}>
                                     <div className={classNames({
-                                        [classes.actionAbsolute]: true,
+                                        [classes.overlayContent]: true,
                                         'MuiTable-root': true,
                                     })}>
                                     {options.onRowHoverOverlayRender(dataObject, rowIndex, data)}
