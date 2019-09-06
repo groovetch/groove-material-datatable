@@ -1,5 +1,5 @@
 {
-  "name": "@local/groove-material-datatable",
+  "name": "groove-material-datatable",
   "version": "0.3.9",
   "description": "Datatable for React using Material-UI",
   "main": "dist/index.js",
