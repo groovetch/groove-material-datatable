@@ -858,6 +858,9 @@ class MaterialDatatable extends React.Component {
                 },
             );
         } else if (type === "cell") {
+          if (!!dataObject._isEdit && dataObject._isEdit)
+            return null;
+  
             this.setState(
                 prevState => {
 
@@ -970,40 +973,49 @@ class MaterialDatatable extends React.Component {
         const {title, classes} = this.props;
         const {columns, filterData, filterList, selectedRows} = this.state;
 
-        return this.options.showSelectedRowsToolbar && selectedRows.data.length ? (
+        return this.options.showSelectedRowsToolbar && selectedRows.data.length ? (<div className={cx(classes.tableTopToolbarSection)}>
             <MaterialDatatableToolbarSelect
                 options={this.options}
                 selectedRows={selectedRows}
                 onRowsDelete={this.selectRowDelete}
                 className={cx(classes.tableTopToolbarSection)}
             />
+            </div>
         ) : (
+          <div className={cx(classes.tableTopToolbarSection)}>
             <MaterialDatatableToolbar
-                columns={columns}
-                data={this.state.displayData}
-                filterData={filterData}
-                filterList={filterList}
-                filterUpdate={this.filterUpdate}
-                options={this.options}
-                searchText={this.state.searchText}
-                resetFilters={this.resetFilters}
-                searchTextUpdate={this.searchTextUpdate}
-                tableRef={this.getTableContentRef}
-                title={title}
-                toggleViewColumn={this.toggleViewColumn}
-                className={cx(classes.tableTopToolbarSection)}
+              columns={columns}
+              data={this.state.displayData}
+              filterData={filterData}
+              filterList={filterList}
+              filterUpdate={this.filterUpdate}
+              options={this.options}
+              searchText={this.state.searchText}
+              resetFilters={this.resetFilters}
+              searchTextUpdate={this.searchTextUpdate}
+              tableRef={this.getTableContentRef}
+              title={title}
+              toggleViewColumn={this.toggleViewColumn}
             />
+          </div>
         );
     }
 
     renderStickyTable = () => {
       const {classes, title, options: {hasStickyColumn, stickyColumns}} = this.props;
+
+      if (
+        !hasStickyColumn ||
+        !stickyColumns ||
+        (stickyColumns instanceof Array && stickyColumns.length === 0))
+        return null;
+
       const { isBackgroundStickyStatus, activeColumn, data, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
       const rowCount = this.options.count || displayData.length;
 
       const newStickyColumns = stickyColumns.map(fieldName => columns.filter( c => c.field === fieldName)[0]);
 
-      if (!hasStickyColumn || !newStickyColumns) return null;
+      if (!newStickyColumns) return null;
 
       const stickyData = this.getDisplayData(newStickyColumns, data, filterList, searchText);
 
