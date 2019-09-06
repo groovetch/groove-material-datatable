@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import MaterialDatatable from "../../src/";
 import Button from "@material-ui/core/Button/Button";
+import { blue } from "@material-ui/core/colors";
 
 class Example extends React.Component {
 
@@ -246,10 +247,11 @@ class Example extends React.Component {
                 return (
                     <div
                         style={{
-                            backgroundColor: 'rgba(100, 100, 0, 0.5)',
-                            height: 50,
+                            backgroundColor: 'green',
                         }}
-                    />
+                    >
+                        <button onClick={() => alert(1)}>CLICK</button>
+                    </div>
                 )
             },
         };
