@@ -15,6 +15,22 @@ const defaultBodyRowStyles = {
         '&:hover': {
             cursor: 'pointer'
         }
+    },
+    rowDefault: {
+        '&:hover .duc': {
+            display: 'block'
+        }
+    },
+    actionRowWrapper: {
+        display: 'none',
+        position: 'relative',
+        zIndex: 1,
+    },
+    actionAbsolute: {
+        position: 'absolute',
+        zIndex: 10,
+        right: 0,
+        top: 0,
     }
 };
 
@@ -28,23 +44,56 @@ class MaterialDatatableBodyRow extends React.Component {
         rowSelected: PropTypes.bool,
         /** Extend the style applied to components */
         classes: PropTypes.object,
+        /** correspondind data */
+        dataObject: PropTypes.object,
+        /** list of data pass to table */
+        data: PropTypes.object,
+        /** row index */
+        rowIndex: PropTypes.object,
     };
+    constructor(props) {
+        super(props);
+        this.state = {
+            isHover: false,
+        }
+    }
 
     render() {
-        const {classes, options, rowSelected, onClick} = this.props;
+        const {classes, options, rowSelected, onClick, dataObject, rowIndex, data} = this.props;
 
         return (
-            <TableRow
-                hover={options.rowHover}
-                onClick={onClick}
-                className={classNames({
-                    [classes.root]: true,
-                    [classes.cursorHover]: options.rowCursorHand,
-                    [classes.responsiveStacked]: options.responsive === "stacked",
-                })}
-                selected={rowSelected}>
-                {this.props.children}
-            </TableRow>
+            <React.Fragment>
+                
+                <TableRow
+                    hover={options.rowHover}
+                    onClick={onClick}
+                    className={classNames({
+                        [classes.root]: true,
+                        [classes.cursorHover]: options.rowCursorHand,
+                        [classes.responsiveStacked]: options.responsive === "stacked",
+                        [classes.rowDefault]: true,
+                    })}
+                    selected={rowSelected}>
+                        {this.props.children}
+                    {
+                        options.useOnRowHoverOverlay && (
+                            <td>
+                                <div className={classNames({
+                                    [classes.actionRowWrapper]: true,
+                                    'duc': true
+                                })}>
+                                    <div className={classNames({
+                                        [classes.actionAbsolute]: true,
+                                        'MuiTable-root': true,
+                                    })}>
+                                    {options.onRowHoverOverlayRender(dataObject, rowIndex, data)}
+                                </div>
+                                </div>
+                            </td>
+                        )
+                    }
+                </TableRow>
+            </React.Fragment>
         );
     }
 }

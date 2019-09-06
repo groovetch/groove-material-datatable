@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import MaterialDatatable from "../../src/";
 import Button from "@material-ui/core/Button/Button";
+import { blue } from "@material-ui/core/colors";
 
 class Example extends React.Component {
 
@@ -240,7 +241,19 @@ class Example extends React.Component {
             filterList: [[], [], ["Location 2"], [], [], [], []],
 
             onTableChange: (action, state) => this.onChange(state),
-            onRowClick: (rowObject) => this.handleOnClick(rowObject)
+            onRowClick: (rowObject) => this.handleOnClick(rowObject),
+            useOnRowHoverOverlay: true,
+            onRowHoverOverlayRender: (data, index) => {
+                return (
+                    <div
+                        style={{
+                            backgroundColor: 'green',
+                        }}
+                    >
+                        <button onClick={() => alert(1)}>CLICK</button>
+                    </div>
+                )
+            },
         };
 
         if (this.state.tableState !== undefined && this.state.tableState !== null) {

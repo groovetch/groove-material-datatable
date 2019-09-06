@@ -1,6 +1,6 @@
 {
   "name": "groove-material-datatable",
-  "version": "0.3.9",
+  "version": "0.4.8",
   "description": "Datatable for React using Material-UI",
   "main": "dist/index.js",
   "types": "index.d.ts",
@@ -40,6 +40,8 @@
   },
   "homepage": "https://github.com/diaver/material-datatable#readme",
   "devDependencies": {
+    "@material-ui/core": "^4.4.0",
+    "@material-ui/icons": "^4.2.1",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.0.3",
