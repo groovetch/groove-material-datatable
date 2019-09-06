@@ -42,6 +42,7 @@ var TableHead = _interopDefault(require('@material-ui/core/TableHead'));
 var TableSortLabel = _interopDefault(require('@material-ui/core/TableSortLabel'));
 var TableFooter = _interopDefault(require('@material-ui/core/TableFooter'));
 var TablePagination = _interopDefault(require('@material-ui/core/TablePagination'));
+var debounce = _interopDefault(require('lodash.debounce'));
 var cloneDeep = _interopDefault(require('lodash.clonedeep'));
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
@@ -1748,6 +1749,8 @@ var MaterialDatatableBody = function (_React$Component) {
                             key: rowIndex },
                         (options.selectableRows || options.onlyOneRowCanBeSelected) && React.createElement(MaterialDatatableSelectCell$1, { checked: _this2.isRowSelected(dataIndex) }),
                         row.map(function (column, index) {
+                            if (columns[index] === undefined) return null;
+
                             return columns[index].display === "true" && React.createElement(
                                 MaterialDatatableBodyCell$1,
                                 {
@@ -2350,6 +2353,34 @@ var defaultTableStyles = {
         padding: "0",
         position: "absolute",
         width: "1px"
+    },
+    tableSection: {
+        position: 'relative',
+        zIndex: 1
+    },
+    tableTopToolbarSection: {
+        position: 'relative',
+        zIndex: '10'
+    },
+    overlayStickyTableSection: {
+        position: 'relative',
+        zIndex: 5
+    },
+    overlayStickyTableWrapper: {
+        position: 'absolute',
+        width: 285,
+        left: 0,
+        top: 0,
+        backgroundColor: '#ffffff',
+        overflowX: 'hidden',
+        boxShadow: '1px 0px 2px -3px rgba(0,0,0,.2)',
+
+        '& thead tr': {
+            backgroundColor: 'white'
+        }
+    },
+    overlayStickyBackground: {
+        backgroundColor: '#fdfdfd'
     }
 };
 
@@ -2367,6 +2398,8 @@ var MaterialDatatable$1 = function (_React$Component) {
         var _this = possibleConstructorReturn(this, (MaterialDatatable.__proto__ || Object.getPrototypeOf(MaterialDatatable)).call(this, props));
 
         _this.state = {
+            isShowingStickyTable: true,
+            isBackgroundStickyStatus: false,
             announceText: null,
             activeColumn: null,
             data: [],
@@ -2386,6 +2419,22 @@ var MaterialDatatable$1 = function (_React$Component) {
             sortColumnDirection: null,
             showResponsive: false,
             searchText: null
+        };
+
+        _this.onScrollLeftHandler = function (table) {
+            console.log('scrolled: ', table.scrollLeft);
+
+            if (table.scrollLeft > 0 && !_this.state.isBackgroundStickyStatus) {
+                _this.setState({
+                    isBackgroundStickyStatus: true
+                });
+            }
+
+            if (table.scrollLeft === 0) {
+                _this.setState({
+                    isBackgroundStickyStatus: false
+                });
+            }
         };
 
         _this.setTableAction = function (action) {
@@ -2637,6 +2686,8 @@ var MaterialDatatable$1 = function (_React$Component) {
                     }
                 });
             } else if (type === "cell") {
+                if (!!dataObject._isEdit && dataObject._isEdit) return null;
+
                 _this.setState(function (prevState) {
 
                     if (_this.options.selectableRows === false) {
@@ -2689,6 +2740,101 @@ var MaterialDatatable$1 = function (_React$Component) {
             }
         };
 
+        _this.renderStickyTable = function () {
+            var _cx2;
+
+            var _this$props = _this.props,
+                classes = _this$props.classes,
+                title = _this$props.title,
+                _this$props$options = _this$props.options,
+                hasStickyColumn = _this$props$options.hasStickyColumn,
+                stickyColumns = _this$props$options.stickyColumns;
+
+
+            if (!hasStickyColumn || !stickyColumns || stickyColumns instanceof Array && stickyColumns.length === 0) return null;
+
+            var _this$state2 = _this.state,
+                isBackgroundStickyStatus = _this$state2.isBackgroundStickyStatus,
+                activeColumn = _this$state2.activeColumn,
+                data = _this$state2.data,
+                displayData = _this$state2.displayData,
+                columns = _this$state2.columns,
+                page = _this$state2.page,
+                filterList = _this$state2.filterList,
+                rowsPerPage = _this$state2.rowsPerPage,
+                selectedRows = _this$state2.selectedRows,
+                searchText = _this$state2.searchText;
+
+            var rowCount = _this.options.count || displayData.length;
+
+            var newStickyColumns = stickyColumns.map(function (fieldName) {
+                return columns.filter(function (c) {
+                    return c.field === fieldName;
+                })[0];
+            });
+
+            if (!newStickyColumns) return null;
+
+            var stickyData = _this.getDisplayData(newStickyColumns, data, filterList, searchText);
+
+            return React.createElement(
+                "div",
+                {
+                    ref: _this.tableContent,
+                    className: classNames(defineProperty({
+                        'table-section-overlay': true
+                    }, classes.overlayStickyTableSection, true)) },
+                _this.options.resizableColumns && React.createElement(MaterialDatatableResize$1, { key: rowCount, setResizeable: function setResizeable(fn) {
+                        return _this.setHeadResizeable = fn;
+                    } }),
+                React.createElement(
+                    "div",
+                    { className: classNames((_cx2 = {}, defineProperty(_cx2, classes.overlayStickyTableWrapper, true), defineProperty(_cx2, classes.overlayStickyBackground, isBackgroundStickyStatus), defineProperty(_cx2, 'overlay-table-wrapper', true), _cx2)) },
+                    React.createElement(
+                        Table,
+                        { ref: function ref(el) {
+                                return _this.tableRef = el;
+                            }, tabIndex: "0", role: "grid" },
+                        React.createElement(
+                            "caption",
+                            { className: classes.caption },
+                            title
+                        ),
+                        React.createElement(MaterialDatatableHead$1, {
+                            activeColumn: activeColumn,
+                            data: stickyData,
+                            count: rowCount,
+                            columns: newStickyColumns,
+                            page: page,
+                            rowsPerPage: rowsPerPage,
+                            handleHeadUpdateRef: function handleHeadUpdateRef(fn) {
+                                return _this.updateToolbarSelect = fn;
+                            },
+                            selectedRows: selectedRows,
+                            selectRowUpdate: _this.selectRowUpdate,
+                            toggleSort: function toggleSort(index) {
+                                return _this.toggleSortColumn(index);
+                            },
+                            setCellRef: _this.setHeadCellRef,
+                            options: _this.options
+                        }),
+                        React.createElement(MaterialDatatableBody$1, {
+                            data: stickyData,
+                            count: rowCount,
+                            columns: newStickyColumns,
+                            page: page,
+                            rowsPerPage: rowsPerPage,
+                            selectedRows: selectedRows,
+                            selectRowUpdate: _this.selectRowUpdate,
+                            options: _this.options,
+                            searchText: searchText,
+                            filterList: filterList
+                        })
+                    )
+                )
+            );
+        };
+
         _this.getTableContentRef = function () {
             return _this.tableContent.current;
         };
@@ -2708,20 +2854,35 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "componentDidMount",
         value: function componentDidMount() {
+            var _this2 = this;
+
             this.setHeadResizeable(this.headCellRefs, this.tableRef);
             this.setInitialSort(this.props);
+
+            var tableDefault = document.querySelector('.table-section-default');
+            tableDefault.addEventListener('scroll', debounce(function () {
+                return _this2.onScrollLeftHandler(tableDefault);
+            }, 30));
+        }
+    }, {
+        key: "componentWillUnmount",
+        value: function componentWillUnmount() {
+            var _this3 = this;
+
+            var tableDefault = document.querySelector('.table-section-default');
+            tableDefault.removeEventListener('scroll', function () {
+                return _this3.onScrollLeftHandler(tableDefault);
+            });
+
+            this.setState({
+                isBackgroundStickyStatus: false
+            });
         }
     }, {
         key: "componentWillReceiveProps",
         value: function componentWillReceiveProps(nextProps) {
             if (this.props.data !== nextProps.data || this.props.columns !== nextProps.columns) {
                 if (this.props.options === undefined || this.props.options.componentWillReceiveProps === undefined || this.props.options.componentWillReceiveProps === true) {
-                    this.initializeTable(nextProps);
-                    this.setInitialSort(nextProps);
-                }
-            } else {
-                /* Force reinit the table when `hasStickyColumn` is enabled */
-                if (this.props.options.hasStickyColumn === true && this.props.options.stickyColumns.length > 0) {
                     this.initializeTable(nextProps);
                     this.setInitialSort(nextProps);
                 }
@@ -2817,7 +2978,7 @@ var MaterialDatatable$1 = function (_React$Component) {
 
         // Build the source table data
         value: function setTableData(props, status) {
-            var _this2 = this;
+            var _this4 = this;
 
             var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {};
             var data = props.data,
@@ -2883,7 +3044,7 @@ var MaterialDatatable$1 = function (_React$Component) {
 
                     //Call customBodyRender function we try to take filter value
                     if (typeof columnOptions.customBodyRender === "function") {
-                        var tableMeta = _this2.getTableMeta(rowIndex, colIndex, rowData, [], columnData, _this2.state);
+                        var tableMeta = _this4.getTableMeta(rowIndex, colIndex, rowData, [], columnData, _this4.state);
                         var funcResult = columnOptions.customBodyRender(rowData, tableMeta);
 
                         value = funcResult;
@@ -2901,7 +3062,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                     if (filterData[colIndex].indexOf(value) < 0) filterData[colIndex].push(value);
                 }
 
-                if (_this2.options.sortFilterList) {
+                if (_this4.options.sortFilterList) {
                     var collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
                     filterData[colIndex].sort(collator.compare);
                 }
@@ -2935,8 +3096,8 @@ var MaterialDatatable$1 = function (_React$Component) {
                     filterList: filterList,
                     selectedRows: selectedRowsData,
                     data: tableData,
-                    displayData: _this2.getDisplayData(columnData, tableData, filterList, prevState.searchText),
-                    notModifiedDisplayData: _this2.getDisplayData(columnData, tableData, emptyFilterList, "")
+                    displayData: _this4.getDisplayData(columnData, tableData, filterList, prevState.searchText),
+                    notModifiedDisplayData: _this4.getDisplayData(columnData, tableData, emptyFilterList, "")
                 };
             }, callback);
         }
@@ -2961,6 +3122,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                     var funcResult = columns[index].customBodyRender(rowObjectData, tableMeta, this.updateDataCol.bind(null, rowIndex, index));
                     columnDisplay = funcResult;
                     columnValue = funcResult;
+                    // console.log("TCL: MaterialDatatable -> computeDisplayRow -> columnValue", columnValue)
 
                     if (React.isValidElement(funcResult) && funcResult.props.value) {
                         columnValue = funcResult.props.value;
@@ -3038,7 +3200,7 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "sortTableData",
         value: function sortTableData(index, order, throwNotification) {
-            var _this3 = this;
+            var _this5 = this;
 
             this.setState(function (prevState) {
                 var columns = cloneDeep(prevState.columns);
@@ -3053,7 +3215,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                     }
                 }
 
-                var orderLabel = _this3.getSortDirection(columns[index]);
+                var orderLabel = _this5.getSortDirection(columns[index]);
                 var announceText = "Table now sorted by " + columns[index].name + " : " + orderLabel;
 
                 var newState = {
@@ -3064,18 +3226,18 @@ var MaterialDatatable$1 = function (_React$Component) {
                     sortColumnDirection: order
                 };
 
-                if (_this3.options.serverSide) {
+                if (_this5.options.serverSide) {
                     newState = _extends({}, newState, {
                         data: prevState.data,
                         displayData: prevState.displayData,
                         selectedRows: prevState.selectedRows
                     });
                 } else {
-                    var sortedData = _this3.sortTable(data, index, order, notModifiedDisplayData, columns[index]);
+                    var sortedData = _this5.sortTable(data, index, order, notModifiedDisplayData, columns[index]);
 
                     newState = _extends({}, newState, {
                         data: sortedData.data,
-                        displayData: _this3.getDisplayData(columns, sortedData.data, prevState.filterList, prevState.searchText),
+                        displayData: _this5.getDisplayData(columns, sortedData.data, prevState.filterList, prevState.searchText),
                         selectedRows: sortedData.selectedRows
                     });
                 }
@@ -3083,9 +3245,9 @@ var MaterialDatatable$1 = function (_React$Component) {
                 return newState;
             }, function () {
                 if (throwNotification) {
-                    _this3.setTableAction("sort");
-                    if (_this3.options.onColumnSortChange) {
-                        _this3.options.onColumnSortChange(_this3.state.columns[index].name, _this3.getSortDirection(_this3.state.columns[index]));
+                    _this5.setTableAction("sort");
+                    if (_this5.options.onColumnSortChange) {
+                        _this5.options.onColumnSortChange(_this5.state.columns[index].name, _this5.getSortDirection(_this5.state.columns[index]));
                     }
                 }
             });
@@ -3119,14 +3281,14 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "sortTable",
         value: function sortTable(data, col, order, notModifiedDisplayData, column) {
-            var _this4 = this;
+            var _this6 = this;
 
             var sortedData = notModifiedDisplayData.map(function (row, sIndex) {
                 return {
                     data: row.data[col],
                     dataObject: row.dataObject,
                     position: row.dataIndex,
-                    rowSelected: _this4.state.selectedRows.lookup[row.dataIndex] ? true : false
+                    rowSelected: _this6.state.selectedRows.lookup[row.dataIndex] ? true : false
                 };
             });
 
@@ -3160,7 +3322,9 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "renderTableToolbar",
         value: function renderTableToolbar() {
-            var title = this.props.title;
+            var _props = this.props,
+                title = _props.title,
+                classes = _props.classes;
             var _state = this.state,
                 columns = _state.columns,
                 filterData = _state.filterData,
@@ -3168,33 +3332,43 @@ var MaterialDatatable$1 = function (_React$Component) {
                 selectedRows = _state.selectedRows;
 
 
-            return this.options.showSelectedRowsToolbar && selectedRows.data.length ? React.createElement(MaterialDatatableToolbarSelect$1, {
-                options: this.options,
-                selectedRows: selectedRows,
-                onRowsDelete: this.selectRowDelete
-            }) : React.createElement(MaterialDatatableToolbar$1, {
-                columns: columns,
-                data: this.state.displayData,
-                filterData: filterData,
-                filterList: filterList,
-                filterUpdate: this.filterUpdate,
-                options: this.options,
-                searchText: this.state.searchText,
-                resetFilters: this.resetFilters,
-                searchTextUpdate: this.searchTextUpdate,
-                tableRef: this.getTableContentRef,
-                title: title,
-                toggleViewColumn: this.toggleViewColumn
-            });
+            return this.options.showSelectedRowsToolbar && selectedRows.data.length ? React.createElement(
+                "div",
+                { className: classNames(classes.tableTopToolbarSection) },
+                React.createElement(MaterialDatatableToolbarSelect$1, {
+                    options: this.options,
+                    selectedRows: selectedRows,
+                    onRowsDelete: this.selectRowDelete,
+                    className: classNames(classes.tableTopToolbarSection)
+                })
+            ) : React.createElement(
+                "div",
+                { className: classNames(classes.tableTopToolbarSection) },
+                React.createElement(MaterialDatatableToolbar$1, {
+                    columns: columns,
+                    data: this.state.displayData,
+                    filterData: filterData,
+                    filterList: filterList,
+                    filterUpdate: this.filterUpdate,
+                    options: this.options,
+                    searchText: this.state.searchText,
+                    resetFilters: this.resetFilters,
+                    searchTextUpdate: this.searchTextUpdate,
+                    tableRef: this.getTableContentRef,
+                    title: title,
+                    toggleViewColumn: this.toggleViewColumn
+                })
+            );
         }
     }, {
         key: "renderTable",
         value: function renderTable() {
-            var _this5 = this;
+            var _cx3,
+                _this7 = this;
 
-            var _props = this.props,
-                classes = _props.classes,
-                title = _props.title;
+            var _props2 = this.props,
+                classes = _props2.classes,
+                title = _props2.title;
             var _state2 = this.state,
                 activeColumn = _state2.activeColumn,
                 displayData = _state2.displayData,
@@ -3209,54 +3383,61 @@ var MaterialDatatable$1 = function (_React$Component) {
             var rowCount = this.options.count || displayData.length;
 
             return React.createElement(
-                "div",
-                {
-                    ref: this.tableContent,
-                    style: { position: "relative" },
-                    className: this.options.responsive === "scroll" ? classes.responsiveScroll : null },
-                this.options.resizableColumns && React.createElement(MaterialDatatableResize$1, { key: rowCount, setResizeable: function setResizeable(fn) {
-                        return _this5.setHeadResizeable = fn;
-                    } }),
+                React.Fragment,
+                null,
+                this.renderStickyTable(),
                 React.createElement(
-                    Table,
-                    { ref: function ref(el) {
-                            return _this5.tableRef = el;
-                        }, tabIndex: "0", role: "grid" },
+                    "div",
+                    {
+                        ref: this.tableContent,
+                        className: classNames((_cx3 = {
+                            'table-section-default': true
+                        }, defineProperty(_cx3, classes.tableSection, true), defineProperty(_cx3, classes.responsiveScroll, Boolean(this.options.responsive === "scroll")), _cx3))
+                    },
+                    this.options.resizableColumns && React.createElement(MaterialDatatableResize$1, { key: rowCount, setResizeable: function setResizeable(fn) {
+                            return _this7.setHeadResizeable = fn;
+                        } }),
                     React.createElement(
-                        "caption",
-                        { className: classes.caption },
-                        title
-                    ),
-                    React.createElement(MaterialDatatableHead$1, {
-                        activeColumn: activeColumn,
-                        data: this.state.displayData,
-                        count: rowCount,
-                        columns: columns,
-                        page: page,
-                        rowsPerPage: rowsPerPage,
-                        handleHeadUpdateRef: function handleHeadUpdateRef(fn) {
-                            return _this5.updateToolbarSelect = fn;
-                        },
-                        selectedRows: selectedRows,
-                        selectRowUpdate: this.selectRowUpdate,
-                        toggleSort: function toggleSort(index) {
-                            return _this5.toggleSortColumn(index);
-                        },
-                        setCellRef: this.setHeadCellRef,
-                        options: this.options
-                    }),
-                    React.createElement(MaterialDatatableBody$1, {
-                        data: this.state.displayData,
-                        count: rowCount,
-                        columns: columns,
-                        page: page,
-                        rowsPerPage: rowsPerPage,
-                        selectedRows: selectedRows,
-                        selectRowUpdate: this.selectRowUpdate,
-                        options: this.options,
-                        searchText: searchText,
-                        filterList: filterList
-                    })
+                        Table,
+                        { ref: function ref(el) {
+                                return _this7.tableRef = el;
+                            }, tabIndex: "0", role: "grid" },
+                        React.createElement(
+                            "caption",
+                            { className: classes.caption },
+                            title
+                        ),
+                        React.createElement(MaterialDatatableHead$1, {
+                            activeColumn: activeColumn,
+                            data: displayData,
+                            count: rowCount,
+                            columns: columns,
+                            page: page,
+                            rowsPerPage: rowsPerPage,
+                            handleHeadUpdateRef: function handleHeadUpdateRef(fn) {
+                                return _this7.updateToolbarSelect = fn;
+                            },
+                            selectedRows: selectedRows,
+                            selectRowUpdate: this.selectRowUpdate,
+                            toggleSort: function toggleSort(index) {
+                                return _this7.toggleSortColumn(index);
+                            },
+                            setCellRef: this.setHeadCellRef,
+                            options: this.options
+                        }),
+                        React.createElement(MaterialDatatableBody$1, {
+                            data: displayData,
+                            count: rowCount,
+                            columns: columns,
+                            page: page,
+                            rowsPerPage: rowsPerPage,
+                            selectedRows: selectedRows,
+                            selectRowUpdate: this.selectRowUpdate,
+                            options: this.options,
+                            searchText: searchText,
+                            filterList: filterList
+                        })
+                    )
                 )
             );
         }
@@ -3299,7 +3480,7 @@ var MaterialDatatable$1 = function (_React$Component) {
     }, {
         key: "renderLiveAnnounce",
         value: function renderLiveAnnounce() {
-            var _this6 = this;
+            var _this8 = this;
 
             var classes = this.props.classes;
             var announceText = this.state.announceText;
@@ -3308,7 +3489,7 @@ var MaterialDatatable$1 = function (_React$Component) {
             return React.createElement(
                 "div",
                 { className: classes.liveAnnounce, "aria-live": "polite", ref: function ref(el) {
-                        return _this6.announceRef = el;
+                        return _this8.announceRef = el;
                     } },
                 announceText
             );
