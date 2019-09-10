@@ -225,6 +225,8 @@ class Example extends React.Component {
         ];
 
         let options = {
+          hasStickyColumn: true,
+            stickyColumns: ['name', 'subFieldData'],
             filter: true,
             selectableRows: true,
             usePaperPlaceholder: false,
@@ -275,10 +277,10 @@ class Example extends React.Component {
         );
 
     }
-    
+
     handleOnClick(rowObject){
         console.log(rowObject);
-        
+
         this.setState({
             ...this.state
         });

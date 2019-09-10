@@ -1542,37 +1542,79 @@ var defaultBodyRowStyles = {
         '&:hover': {
             cursor: 'pointer'
         }
+    },
+    rowDefault: {
+        '&:hover .overlay-content-wrapper': {
+            display: 'block'
+        }
+    },
+    overlayContentWrapper: {
+        display: 'none',
+        position: 'relative',
+        zIndex: 1
+    },
+    overlayContent: {
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        zIndex: 10
     }
 };
 
 var MaterialDatatableBodyRow = function (_React$Component) {
     inherits(MaterialDatatableBodyRow, _React$Component);
 
-    function MaterialDatatableBodyRow() {
+    function MaterialDatatableBodyRow(props) {
         classCallCheck(this, MaterialDatatableBodyRow);
-        return possibleConstructorReturn(this, (MaterialDatatableBodyRow.__proto__ || Object.getPrototypeOf(MaterialDatatableBodyRow)).apply(this, arguments));
+
+        var _this = possibleConstructorReturn(this, (MaterialDatatableBodyRow.__proto__ || Object.getPrototypeOf(MaterialDatatableBodyRow)).call(this, props));
+
+        _this.state = {
+            isHover: false
+        };
+        return _this;
     }
 
     createClass(MaterialDatatableBodyRow, [{
         key: "render",
         value: function render() {
-            var _classNames;
+            var _classNames, _classNames2, _classNames3;
 
             var _props = this.props,
                 classes = _props.classes,
                 options = _props.options,
                 rowSelected = _props.rowSelected,
-                onClick = _props.onClick;
+                onClick = _props.onClick,
+                dataObject = _props.dataObject,
+                rowIndex = _props.rowIndex,
+                data = _props.data;
 
 
             return React.createElement(
-                TableRow,
-                {
-                    hover: options.rowHover,
-                    onClick: onClick,
-                    className: classNames((_classNames = {}, defineProperty(_classNames, classes.root, true), defineProperty(_classNames, classes.cursorHover, options.rowCursorHand), defineProperty(_classNames, classes.responsiveStacked, options.responsive === "stacked"), _classNames)),
-                    selected: rowSelected },
-                this.props.children
+                React.Fragment,
+                null,
+                React.createElement(
+                    TableRow,
+                    {
+                        hover: options.rowHover,
+                        onClick: onClick,
+                        className: classNames((_classNames = {}, defineProperty(_classNames, classes.root, true), defineProperty(_classNames, classes.cursorHover, options.rowCursorHand), defineProperty(_classNames, classes.responsiveStacked, options.responsive === "stacked"), defineProperty(_classNames, classes.rowDefault, true), _classNames)),
+                        selected: rowSelected },
+                    this.props.children,
+                    options.useOnRowHoverOverlay && React.createElement(
+                        "td",
+                        null,
+                        React.createElement(
+                            "div",
+                            { className: classNames((_classNames2 = {}, defineProperty(_classNames2, classes.overlayContentWrapper, true), defineProperty(_classNames2, 'overlay-content-wrapper', true), _classNames2)) },
+                            React.createElement(
+                                "div",
+                                { className: classNames((_classNames3 = {}, defineProperty(_classNames3, classes.overlayContent, true), defineProperty(_classNames3, 'MuiTable-root', true), _classNames3)) },
+                                options.onRowHoverOverlayRender(dataObject, rowIndex, data)
+                            )
+                        )
+                    )
+                )
             );
         }
     }]);
@@ -1742,6 +1784,9 @@ var MaterialDatatableBody = function (_React$Component) {
                         {
                             options: options,
                             rowSelected: _this2.isRowSelected(dataIndex),
+                            rowIndex: rowIndex,
+                            row: row,
+                            dataObject: dataObject,
                             onClick: function onClick() {
                                 return _this2.onRowClick(dataObject, { rowIndex: rowIndex, dataIndex: dataIndex });
                             },
@@ -2151,6 +2196,7 @@ var MaterialDatatableHead = function (_React$Component) {
                 setCellRef = _props.setCellRef,
                 selectedRows = _props.selectedRows;
 
+            console.log("TCL: MaterialDatatableHead -> render -> columns", columns);
 
             var numSelected = selectedRows && selectedRows.data.length || 0;
             var isDeterminate = numSelected > 0 && numSelected < count;
@@ -2422,8 +2468,7 @@ var MaterialDatatable$1 = function (_React$Component) {
         };
 
         _this.onScrollLeftHandler = function (table) {
-            console.log('scrolled: ', table.scrollLeft);
-
+            // console.log('scrolled: ', table.scrollLeft);
             if (table.scrollLeft > 0 && !_this.state.isBackgroundStickyStatus) {
                 _this.setState({
                     isBackgroundStickyStatus: true
@@ -2772,10 +2817,16 @@ var MaterialDatatable$1 = function (_React$Component) {
                     return c.field === fieldName;
                 })[0];
             });
+            console.log("TCL: MaterialDatatable -> renderStickyTable -> newStickyColumns", newStickyColumns);
 
             if (!newStickyColumns) return null;
 
-            var stickyData = _this.getDisplayData(newStickyColumns, data, filterList, searchText);
+            var validStickyColumns = newStickyColumns.filter(function (column) {
+                return column !== undefined;
+            });
+            console.log("TCL: MaterialDatatable -> renderStickyTable -> validStickyColumns", validStickyColumns);
+
+            var stickyData = _this.getDisplayData(validStickyColumns, data, filterList, searchText);
 
             return React.createElement(
                 "div",
@@ -2804,7 +2855,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                             activeColumn: activeColumn,
                             data: stickyData,
                             count: rowCount,
-                            columns: newStickyColumns,
+                            columns: validStickyColumns,
                             page: page,
                             rowsPerPage: rowsPerPage,
                             handleHeadUpdateRef: function handleHeadUpdateRef(fn) {
@@ -2821,7 +2872,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                         React.createElement(MaterialDatatableBody$1, {
                             data: stickyData,
                             count: rowCount,
-                            columns: newStickyColumns,
+                            columns: validStickyColumns,
                             page: page,
                             rowsPerPage: rowsPerPage,
                             selectedRows: selectedRows,
@@ -2940,6 +2991,10 @@ var MaterialDatatable$1 = function (_React$Component) {
                 downloadOptions: {
                     filename: "tableDownload.csv",
                     separator: ","
+                },
+                useOnRowOverlay: false,
+                onRowOverlayRender: function onRowOverlayRender() {
+                    return null;
                 }
             };
 

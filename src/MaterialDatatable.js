@@ -191,8 +191,7 @@ class MaterialDatatable extends React.Component {
     }
 
     onScrollLeftHandler = table => {
-        console.log('scrolled: ', table.scrollLeft);
-
+        // console.log('scrolled: ', table.scrollLeft);
         if (table.scrollLeft > 0 && !this.state.isBackgroundStickyStatus) {
           this.setState({
             isBackgroundStickyStatus: true,
@@ -474,7 +473,6 @@ class MaterialDatatable extends React.Component {
                 let funcResult = columns[index].customBodyRender(rowObjectData, tableMeta, this.updateDataCol.bind(null, rowIndex, index));
                 columnDisplay = funcResult;
                 columnValue = funcResult;
-                // console.log("TCL: MaterialDatatable -> computeDisplayRow -> columnValue", columnValue)
 
                 if (React.isValidElement(funcResult) && funcResult.props.value) {
                     columnValue = funcResult.props.value;
@@ -864,7 +862,7 @@ class MaterialDatatable extends React.Component {
         } else if (type === "cell") {
           if (!!dataObject._isEdit && dataObject._isEdit)
             return null;
-  
+
             this.setState(
                 prevState => {
 
@@ -1021,7 +1019,10 @@ class MaterialDatatable extends React.Component {
 
       if (!newStickyColumns) return null;
 
-      const stickyData = this.getDisplayData(newStickyColumns, data, filterList, searchText);
+      // In case the passed sticky columns is not available, remove it
+      const validStickyColumns = newStickyColumns.filter( column => column !== undefined );
+
+      const stickyData = this.getDisplayData(validStickyColumns, data, filterList, searchText);
 
       return (
         <div
@@ -1045,7 +1046,7 @@ class MaterialDatatable extends React.Component {
                     activeColumn={activeColumn}
                     data={stickyData}
                     count={rowCount}
-                    columns={newStickyColumns}
+                    columns={validStickyColumns}
                     page={page}
                     rowsPerPage={rowsPerPage}
                     handleHeadUpdateRef={fn => (this.updateToolbarSelect = fn)}
@@ -1058,7 +1059,7 @@ class MaterialDatatable extends React.Component {
                 <MaterialDatatableBody
                     data={stickyData}
                     count={rowCount}
-                    columns={newStickyColumns}
+                    columns={validStickyColumns}
                     page={page}
                     rowsPerPage={rowsPerPage}
                     selectedRows={selectedRows}
