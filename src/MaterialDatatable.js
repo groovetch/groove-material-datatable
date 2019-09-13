@@ -1013,6 +1013,7 @@ class MaterialDatatable extends React.Component {
         return null;
 
       const { isBackgroundStickyStatus, activeColumn, data, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
+      
       const rowCount = this.options.count || displayData.length;
 
       const newStickyColumns = stickyColumns.map(fieldName => columns.filter( c => c.field === fieldName)[0]);

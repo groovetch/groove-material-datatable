@@ -1,6 +1,6 @@
 {
   "name": "groove-material-datatable",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "Datatable for React using Material-UI",
   "main": "dist/index.js",
   "types": "index.d.ts",

@@ -2196,7 +2196,6 @@ var MaterialDatatableHead = function (_React$Component) {
                 setCellRef = _props.setCellRef,
                 selectedRows = _props.selectedRows;
 
-            console.log("TCL: MaterialDatatableHead -> render -> columns", columns);
 
             var numSelected = selectedRows && selectedRows.data.length || 0;
             var isDeterminate = numSelected > 0 && numSelected < count;
@@ -2810,6 +2809,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                 selectedRows = _this$state2.selectedRows,
                 searchText = _this$state2.searchText;
 
+
             var rowCount = _this.options.count || displayData.length;
 
             var newStickyColumns = stickyColumns.map(function (fieldName) {
@@ -2817,14 +2817,13 @@ var MaterialDatatable$1 = function (_React$Component) {
                     return c.field === fieldName;
                 })[0];
             });
-            console.log("TCL: MaterialDatatable -> renderStickyTable -> newStickyColumns", newStickyColumns);
 
             if (!newStickyColumns) return null;
 
+            // In case the passed sticky columns is not available, remove it
             var validStickyColumns = newStickyColumns.filter(function (column) {
                 return column !== undefined;
             });
-            console.log("TCL: MaterialDatatable -> renderStickyTable -> validStickyColumns", validStickyColumns);
 
             var stickyData = _this.getDisplayData(validStickyColumns, data, filterList, searchText);
 
@@ -3177,7 +3176,6 @@ var MaterialDatatable$1 = function (_React$Component) {
                     var funcResult = columns[index].customBodyRender(rowObjectData, tableMeta, this.updateDataCol.bind(null, rowIndex, index));
                     columnDisplay = funcResult;
                     columnValue = funcResult;
-                    // console.log("TCL: MaterialDatatable -> computeDisplayRow -> columnValue", columnValue)
 
                     if (React.isValidElement(funcResult) && funcResult.props.value) {
                         columnValue = funcResult.props.value;
