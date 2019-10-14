@@ -56,9 +56,16 @@ const defaultTableStyles = {
     backgroundColor: '#ffffff',
     overflowX: 'hidden',
     boxShadow: '1px 0px 2px -3px rgba(0,0,0,.2)',
+    display: 'none',
+    visibility: 'hidden',
 
     '& thead tr': {
       backgroundColor: 'white'
+    },
+
+    ['&.is-sticky-visible']: {
+      display: 'block',
+      visibility: 'visible',
     }
   },
   overlayStickyBackground: {
@@ -141,6 +148,7 @@ class MaterialDatatable extends React.Component {
             }),
             useOnRowHoverOverlay: PropTypes.bool,
             onRowHoverOverlayRender: PropTypes.func,
+            hideOverlayRenderWhenNoSticky: PropTypes.bool,
         }),
         /** Pass and use className to style MaterialDatatable as desired */
         className: PropTypes.string,
@@ -175,6 +183,7 @@ class MaterialDatatable extends React.Component {
       sortColumnDirection: null,
       showResponsive: false,
       searchText: null,
+
     };
 
     constructor(props) {
@@ -190,19 +199,53 @@ class MaterialDatatable extends React.Component {
         this.initializeTable(this.props);
     }
 
-    onScrollLeftHandler = table => {
-        // console.log('scrolled: ', table.scrollLeft);
-        if (table.scrollLeft > 0 && !this.state.isBackgroundStickyStatus) {
-          this.setState({
-            isBackgroundStickyStatus: true,
-          });
-        }
+    calculateOverlayBodyWhenHover = table => {
+      try {
+        const contentOffset = 125;
+        const row = table.querySelector('tr');
+        const overlayContent = table.querySelectorAll('.overlay-content-wrapper');
+        if (row && overlayContent) {
+          const content = overlayContent[0].getBoundingClientRect();
+          const oneRow = row.getBoundingClientRect();
+          const tableDim = table.getBoundingClientRect();
 
-        if (table.scrollLeft === 0) {
-          this.setState({
-            isBackgroundStickyStatus: false,
-          });
+          const newRight = oneRow.width - (table.scrollLeft + tableDim.width + content.width - 25);
+
+          for (const eachRow of overlayContent ) {
+            if (newRight <= (content.width + contentOffset)) {
+              eachRow.classList.add('is-hidden');
+            } else {
+              eachRow.classList.remove('is-hidden');
+              const node = eachRow.querySelector('.overlay-content');
+              if (node)
+                node.style.right = `${newRight}px`;
+            }
+          }
         }
+      } catch (error) {
+        console.log('calculateOverlayBodyWhenHover: ', error);
+      }
+    }
+
+    onScrollLeftHandler = table => {
+      const { options: { hideOverlayRenderWhenNoSticky, hasStickyColumn } } = this.props;
+      // Only calulate if table has sticky columns and the overlay part
+      // will show up if the row is too long
+      if (hasStickyColumn && hideOverlayRenderWhenNoSticky)
+        this.calculateOverlayBodyWhenHover(table);
+
+      // console.log('scrolled: ', table.scrollLeft);
+      if (table.scrollLeft > 0 &&   !this.state.isBackgroundStickyStatus) {
+        this.setState({
+          isBackgroundStickyStatus: true,
+        });
+      }
+
+      if (table.scrollLeft === 0) {
+        this.setState({
+          isBackgroundStickyStatus: false,
+        });
+      }
     };
 
     componentDidMount() {
@@ -211,6 +254,13 @@ class MaterialDatatable extends React.Component {
 
       const tableDefault = document.querySelector('.table-section-default');
       tableDefault.addEventListener('scroll',debounce(() => this.onScrollLeftHandler(tableDefault), 30));
+
+      this.calculateOverlayBodyWhenHover(tableDefault);
+      const { options: { hideOverlayRenderWhenNoSticky, hasStickyColumn } } = this.props;
+      // Only calulate if table has sticky columns and the overlay part
+      // will show up if the row is too long
+      if (hasStickyColumn && hideOverlayRenderWhenNoSticky)
+        this.calculateOverlayBodyWhenHover(tableDefault);
     }
 
     componentWillUnmount() {
@@ -280,6 +330,7 @@ class MaterialDatatable extends React.Component {
                 separator: ",",
             },
             useOnRowOverlay: false,
+            hideOverlayRenderWhenNoSticky: false,
             onRowOverlayRender: () => null,
         };
 
@@ -1013,7 +1064,7 @@ class MaterialDatatable extends React.Component {
         return null;
 
       const { isBackgroundStickyStatus, activeColumn, data, displayData, columns, page, filterList, rowsPerPage, selectedRows, searchText} = this.state;
-      
+
       const rowCount = this.options.count || displayData.length;
 
       const newStickyColumns = stickyColumns.map(fieldName => columns.filter( c => c.field === fieldName)[0]);
@@ -1027,7 +1078,7 @@ class MaterialDatatable extends React.Component {
 
       return (
         <div
-          ref={this.tableContent}
+          // ref={this.tableContent}
           className={cx({
             'table-section-overlay': true,
             [classes.overlayStickyTableSection]: true,
@@ -1039,6 +1090,7 @@ class MaterialDatatable extends React.Component {
           <div className={cx({
             [classes.overlayStickyTableWrapper]: true,
             [classes.overlayStickyBackground]: isBackgroundStickyStatus,
+            'is-sticky-visible': isBackgroundStickyStatus,
             'overlay-table-wrapper': true,
           })}>
             <Table ref={el => (this.tableRef = el)} tabIndex={"0"} role={"grid"}>
@@ -1055,7 +1107,10 @@ class MaterialDatatable extends React.Component {
                     selectRowUpdate={this.selectRowUpdate}
                     toggleSort={(index) => this.toggleSortColumn(index)}
                     setCellRef={this.setHeadCellRef}
-                    options={this.options}
+                    options={{
+                      ...this.options,
+                      viewColumns: false,
+                    }}
                 />
                 <MaterialDatatableBody
                     data={stickyData}
@@ -1065,7 +1120,11 @@ class MaterialDatatable extends React.Component {
                     rowsPerPage={rowsPerPage}
                     selectedRows={selectedRows}
                     selectRowUpdate={this.selectRowUpdate}
-                    options={this.options}
+                    options={{
+                      ...this.options,
+                      useOnRowHoverOverlay: false,
+                      onRowOverlayRender: () => null,
+                    }}
                     searchText={searchText}
                     filterList={filterList}
                 />
@@ -1176,6 +1235,7 @@ class MaterialDatatable extends React.Component {
     }
 
     getTableContentRef = () => {
+      // console.log("TCL: getTableContentRef -> this.tableContent.current", this.tableContent.current)
       return this.tableContent.current;
     };
 

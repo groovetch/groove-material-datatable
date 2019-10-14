@@ -1544,12 +1544,14 @@ var defaultBodyRowStyles = {
         }
     },
     rowDefault: {
-        '&:hover .overlay-content-wrapper': {
-            display: 'block'
+        '&:hover .overlay-content-wrapper:not(.is-hidden)': {
+            display: 'block',
+            visibility: 'visible'
         }
     },
     overlayContentWrapper: {
         display: 'none',
+        visibility: 'hidden',
         position: 'relative',
         zIndex: 1
     },
@@ -1557,7 +1559,13 @@ var defaultBodyRowStyles = {
         position: 'absolute',
         right: 0,
         top: 0,
-        zIndex: 10
+        zIndex: 10,
+        transform: 'translateY(-50%)'
+    },
+    noPadding: {
+        '&.MuiTableCell-root': {
+            padding: 0
+        }
     }
 };
 
@@ -1578,7 +1586,7 @@ var MaterialDatatableBodyRow = function (_React$Component) {
     createClass(MaterialDatatableBodyRow, [{
         key: "render",
         value: function render() {
-            var _classNames, _classNames2, _classNames3;
+            var _classNames, _classNames2, _classNames3, _classNames4;
 
             var _props = this.props,
                 classes = _props.classes,
@@ -1603,13 +1611,13 @@ var MaterialDatatableBodyRow = function (_React$Component) {
                     this.props.children,
                     options.useOnRowHoverOverlay && React.createElement(
                         "td",
-                        null,
+                        { className: classNames((_classNames2 = {}, defineProperty(_classNames2, classes.noPadding, true), defineProperty(_classNames2, 'MuiTableCell-root', true), _classNames2)) },
                         React.createElement(
                             "div",
-                            { className: classNames((_classNames2 = {}, defineProperty(_classNames2, classes.overlayContentWrapper, true), defineProperty(_classNames2, 'overlay-content-wrapper', true), _classNames2)) },
+                            { className: classNames((_classNames3 = {}, defineProperty(_classNames3, classes.overlayContentWrapper, true), defineProperty(_classNames3, 'overlay-content-wrapper', true), defineProperty(_classNames3, 'is-hidden', true), _classNames3)) },
                             React.createElement(
                                 "div",
-                                { className: classNames((_classNames3 = {}, defineProperty(_classNames3, classes.overlayContent, true), defineProperty(_classNames3, 'MuiTable-root', true), _classNames3)) },
+                                { className: classNames((_classNames4 = {}, defineProperty(_classNames4, classes.overlayContent, true), defineProperty(_classNames4, 'overlay-content', true), _classNames4)) },
                                 options.onRowHoverOverlayRender(dataObject, rowIndex, data)
                             )
                         )
@@ -2411,7 +2419,7 @@ var defaultTableStyles = {
         position: 'relative',
         zIndex: 5
     },
-    overlayStickyTableWrapper: {
+    overlayStickyTableWrapper: defineProperty({
         position: 'absolute',
         width: 285,
         left: 0,
@@ -2419,11 +2427,17 @@ var defaultTableStyles = {
         backgroundColor: '#ffffff',
         overflowX: 'hidden',
         boxShadow: '1px 0px 2px -3px rgba(0,0,0,.2)',
+        display: 'none',
+        visibility: 'hidden',
 
         '& thead tr': {
             backgroundColor: 'white'
         }
-    },
+
+    }, '&.is-sticky-visible', {
+        display: 'block',
+        visibility: 'visible'
+    }),
     overlayStickyBackground: {
         backgroundColor: '#fdfdfd'
     }
@@ -2464,9 +2478,66 @@ var MaterialDatatable$1 = function (_React$Component) {
             sortColumnDirection: null,
             showResponsive: false,
             searchText: null
+
+        };
+
+        _this.calculateOverlayBodyWhenHover = function (table) {
+            try {
+                var contentOffset = 125;
+                var row = table.querySelector('tr');
+                var overlayContent = table.querySelectorAll('.overlay-content-wrapper');
+                if (row && overlayContent) {
+                    var content = overlayContent[0].getBoundingClientRect();
+                    var oneRow = row.getBoundingClientRect();
+                    var tableDim = table.getBoundingClientRect();
+
+                    var newRight = oneRow.width - (table.scrollLeft + tableDim.width + content.width - 25);
+
+                    var _iteratorNormalCompletion = true;
+                    var _didIteratorError = false;
+                    var _iteratorError = undefined;
+
+                    try {
+                        for (var _iterator = overlayContent[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                            var eachRow = _step.value;
+
+                            if (newRight <= content.width + contentOffset) {
+                                eachRow.classList.add('is-hidden');
+                            } else {
+                                eachRow.classList.remove('is-hidden');
+                                var node = eachRow.querySelector('.overlay-content');
+                                if (node) node.style.right = newRight + "px";
+                            }
+                        }
+                    } catch (err) {
+                        _didIteratorError = true;
+                        _iteratorError = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion && _iterator.return) {
+                                _iterator.return();
+                            }
+                        } finally {
+                            if (_didIteratorError) {
+                                throw _iteratorError;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('calculateOverlayBodyWhenHover: ', error);
+            }
         };
 
         _this.onScrollLeftHandler = function (table) {
+            var _this$props$options = _this.props.options,
+                hideOverlayRenderWhenNoSticky = _this$props$options.hideOverlayRenderWhenNoSticky,
+                hasStickyColumn = _this$props$options.hasStickyColumn;
+            // Only calulate if table has sticky columns and the overlay part
+            // will show up if the row is too long
+
+            if (hasStickyColumn && hideOverlayRenderWhenNoSticky) _this.calculateOverlayBodyWhenHover(table);
+
             // console.log('scrolled: ', table.scrollLeft);
             if (table.scrollLeft > 0 && !_this.state.isBackgroundStickyStatus) {
                 _this.setState({
@@ -2790,9 +2861,9 @@ var MaterialDatatable$1 = function (_React$Component) {
             var _this$props = _this.props,
                 classes = _this$props.classes,
                 title = _this$props.title,
-                _this$props$options = _this$props.options,
-                hasStickyColumn = _this$props$options.hasStickyColumn,
-                stickyColumns = _this$props$options.stickyColumns;
+                _this$props$options2 = _this$props.options,
+                hasStickyColumn = _this$props$options2.hasStickyColumn,
+                stickyColumns = _this$props$options2.stickyColumns;
 
 
             if (!hasStickyColumn || !stickyColumns || stickyColumns instanceof Array && stickyColumns.length === 0) return null;
@@ -2830,7 +2901,7 @@ var MaterialDatatable$1 = function (_React$Component) {
             return React.createElement(
                 "div",
                 {
-                    ref: _this.tableContent,
+                    // ref={this.tableContent}
                     className: classNames(defineProperty({
                         'table-section-overlay': true
                     }, classes.overlayStickyTableSection, true)) },
@@ -2839,7 +2910,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                     } }),
                 React.createElement(
                     "div",
-                    { className: classNames((_cx2 = {}, defineProperty(_cx2, classes.overlayStickyTableWrapper, true), defineProperty(_cx2, classes.overlayStickyBackground, isBackgroundStickyStatus), defineProperty(_cx2, 'overlay-table-wrapper', true), _cx2)) },
+                    { className: classNames((_cx2 = {}, defineProperty(_cx2, classes.overlayStickyTableWrapper, true), defineProperty(_cx2, classes.overlayStickyBackground, isBackgroundStickyStatus), defineProperty(_cx2, 'is-sticky-visible', isBackgroundStickyStatus), defineProperty(_cx2, 'overlay-table-wrapper', true), _cx2)) },
                     React.createElement(
                         Table,
                         { ref: function ref(el) {
@@ -2866,7 +2937,9 @@ var MaterialDatatable$1 = function (_React$Component) {
                                 return _this.toggleSortColumn(index);
                             },
                             setCellRef: _this.setHeadCellRef,
-                            options: _this.options
+                            options: _extends({}, _this.options, {
+                                viewColumns: false
+                            })
                         }),
                         React.createElement(MaterialDatatableBody$1, {
                             data: stickyData,
@@ -2876,7 +2949,12 @@ var MaterialDatatable$1 = function (_React$Component) {
                             rowsPerPage: rowsPerPage,
                             selectedRows: selectedRows,
                             selectRowUpdate: _this.selectRowUpdate,
-                            options: _this.options,
+                            options: _extends({}, _this.options, {
+                                useOnRowHoverOverlay: false,
+                                onRowOverlayRender: function onRowOverlayRender() {
+                                    return null;
+                                }
+                            }),
                             searchText: searchText,
                             filterList: filterList
                         })
@@ -2886,6 +2964,7 @@ var MaterialDatatable$1 = function (_React$Component) {
         };
 
         _this.getTableContentRef = function () {
+            // console.log("TCL: getTableContentRef -> this.tableContent.current", this.tableContent.current)
             return _this.tableContent.current;
         };
 
@@ -2913,6 +2992,15 @@ var MaterialDatatable$1 = function (_React$Component) {
             tableDefault.addEventListener('scroll', debounce(function () {
                 return _this2.onScrollLeftHandler(tableDefault);
             }, 30));
+
+            this.calculateOverlayBodyWhenHover(tableDefault);
+            var _props$options = this.props.options,
+                hideOverlayRenderWhenNoSticky = _props$options.hideOverlayRenderWhenNoSticky,
+                hasStickyColumn = _props$options.hasStickyColumn;
+            // Only calulate if table has sticky columns and the overlay part
+            // will show up if the row is too long
+
+            if (hasStickyColumn && hideOverlayRenderWhenNoSticky) this.calculateOverlayBodyWhenHover(tableDefault);
         }
     }, {
         key: "componentWillUnmount",
@@ -2992,6 +3080,7 @@ var MaterialDatatable$1 = function (_React$Component) {
                     separator: ","
                 },
                 useOnRowOverlay: false,
+                hideOverlayRenderWhenNoSticky: false,
                 onRowOverlayRender: function onRowOverlayRender() {
                     return null;
                 }
