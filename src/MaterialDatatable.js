@@ -227,12 +227,24 @@ class MaterialDatatable extends React.Component {
       }
     }
 
+    getDefaultTable = () => document.querySelector('.table-section-default');
+
+    onCheckAndUpdateOverlayPosition = tableDOM => {
+      try {
+        const table = !tableDOM ? this.getDefaultTable() : tableDOM;
+        const { options: { hideOverlayRenderWhenNoSticky, hasStickyColumn } } = this.props;
+
+        // Only calulate if table has sticky columns and the overlay part
+        // will show up if the row is too long
+        if (hasStickyColumn && hideOverlayRenderWhenNoSticky)
+          this.calculateOverlayBodyWhenHover(table);
+      } catch (error) {
+        console.log('onCheckAndUpdateOverlayPosition error: ', error)
+      }
+    }
+
     onScrollLeftHandler = table => {
-      const { options: { hideOverlayRenderWhenNoSticky, hasStickyColumn } } = this.props;
-      // Only calulate if table has sticky columns and the overlay part
-      // will show up if the row is too long
-      if (hasStickyColumn && hideOverlayRenderWhenNoSticky)
-        this.calculateOverlayBodyWhenHover(table);
+      this.onCheckAndUpdateOverlayPosition(table);
 
       // console.log('scrolled: ', table.scrollLeft);
       if (table.scrollLeft > 0 &&   !this.state.isBackgroundStickyStatus) {
@@ -252,26 +264,24 @@ class MaterialDatatable extends React.Component {
       this.setHeadResizeable(this.headCellRefs, this.tableRef);
       this.setInitialSort(this.props);
 
-      const tableDefault = document.querySelector('.table-section-default');
+      const tableDefault = this.getDefaultTable();
       tableDefault.addEventListener('scroll',debounce(() => this.onScrollLeftHandler(tableDefault), 30));
 
-      this.calculateOverlayBodyWhenHover(tableDefault);
-      const { options: { hideOverlayRenderWhenNoSticky, hasStickyColumn } } = this.props;
-      // Only calulate if table has sticky columns and the overlay part
-      // will show up if the row is too long
-      if (hasStickyColumn && hideOverlayRenderWhenNoSticky)
-        this.calculateOverlayBodyWhenHover(tableDefault);
+      this.onCheckAndUpdateOverlayPosition(tableDefault);
+    }
+
+    componentDidUpdate() {
+      this.onCheckAndUpdateOverlayPosition();
     }
 
     componentWillUnmount() {
-      const tableDefault = document.querySelector('.table-section-default');
+      const tableDefault = this.getDefaultTable();
       tableDefault.removeEventListener('scroll', () => this.onScrollLeftHandler(tableDefault));
 
       this.setState({
         isBackgroundStickyStatus: false,
       });
     }
-
 
     componentWillReceiveProps(nextProps) {
       if (this.props.data !== nextProps.data || this.props.columns !== nextProps.columns) {
