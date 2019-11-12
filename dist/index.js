@@ -720,7 +720,8 @@ var MaterialDatatableFilter$1 = styles.withStyles(defaultFilterStyles, { name: "
 var defaultViewColStyles = {
     root: {
         padding: "16px 24px 16px 24px",
-        fontFamily: "Roboto"
+        fontFamily: "Roboto",
+        maxHeight: 360
     },
     title: {
         marginLeft: "-7px",
