@@ -2389,59 +2389,65 @@ var textLabels = {
     }
 };
 
-var defaultTableStyles = {
-    root: {},
-    responsiveScroll: {
-        overflowX: "auto"
-    },
-    caption: {
-        position: "absolute",
-        left: "-1000px"
-    },
-    liveAnnounce: {
-        border: "0",
-        clip: "rect(0 0 0 0)",
-        height: "1px",
-        margin: "-1px",
-        overflow: "hidden",
-        padding: "0",
-        position: "absolute",
-        width: "1px"
-    },
-    tableSection: {
-        position: 'relative',
-        zIndex: 1
-    },
-    tableTopToolbarSection: {
-        position: 'relative',
-        zIndex: '10'
-    },
-    overlayStickyTableSection: {
-        position: 'relative',
-        zIndex: 5
-    },
-    overlayStickyTableWrapper: defineProperty({
-        position: 'absolute',
-        width: 285,
-        left: 0,
-        top: 0,
-        backgroundColor: '#ffffff',
-        overflowX: 'hidden',
-        boxShadow: '1px 0px 2px -3px rgba(0,0,0,.2)',
-        display: 'none',
-        visibility: 'hidden',
+var defaultTableStyles = function defaultTableStyles(theme) {
+    var _overlayStickyTableWr;
 
-        '& thead tr': {
-            backgroundColor: 'white'
+    return {
+        root: {},
+        responsiveScroll: {
+            overflowX: "auto"
+        },
+        caption: {
+            position: "absolute",
+            left: "-1000px"
+        },
+        liveAnnounce: {
+            border: "0",
+            clip: "rect(0 0 0 0)",
+            height: "1px",
+            margin: "-1px",
+            overflow: "hidden",
+            padding: "0",
+            position: "absolute",
+            width: "1px"
+        },
+        tableSection: {
+            position: 'relative',
+            zIndex: 1
+        },
+        tableTopToolbarSection: {
+            position: 'relative',
+            zIndex: '10'
+        },
+        overlayStickyTableSection: {
+            position: 'relative',
+            zIndex: 5
+        },
+        overlayStickyTableWrapper: (_overlayStickyTableWr = {
+            position: 'absolute',
+            width: 285,
+            left: 0,
+            top: 0,
+            backgroundColor: '#ffffff',
+            overflowX: 'hidden',
+            boxShadow: '1px 0px 2px -3px rgba(0,0,0,.2)',
+            display: 'none',
+            visibility: 'hidden',
+
+            '& thead tr': {
+                backgroundColor: 'white'
+            }
+
+        }, defineProperty(_overlayStickyTableWr, '&.is-sticky-visible', {
+            display: 'block',
+            visibility: 'visible'
+        }), defineProperty(_overlayStickyTableWr, theme.breakpoints.down('sm'), {
+            width: 160
+        }), _overlayStickyTableWr),
+        overlayStickyBackground: {
+            backgroundColor: '#fdfdfd'
         }
-
-    }, '&.is-sticky-visible', {
-        display: 'block',
-        visibility: 'visible'
-    }),
-    overlayStickyBackground: {
-        backgroundColor: '#fdfdfd'
-    }
+    };
 };
 
 var TABLE_LOAD = {

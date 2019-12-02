@@ -17,7 +17,7 @@ import textLabels from "./textLabels";
 import {withStyles} from "@material-ui/core/styles";
 
 
-const defaultTableStyles = {
+const defaultTableStyles = theme => ({
   root: {},
   responsiveScroll: {
       overflowX: "auto",
@@ -66,12 +66,15 @@ const defaultTableStyles = {
     ['&.is-sticky-visible']: {
       display: 'block',
       visibility: 'visible',
-    }
+    },
+    [theme.breakpoints.down('sm')]: {
+      width: 160,
+    },
   },
   overlayStickyBackground: {
     backgroundColor: '#fdfdfd',
   }
-};
+});
 
 const TABLE_LOAD = {
     INITIAL: 1,
