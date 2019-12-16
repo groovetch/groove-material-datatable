@@ -1,12 +1,11 @@
 {
   "name": "groove-material-datatable",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "description": "Datatable for React using Material-UI",
   "main": "dist/index.js",
   "types": "index.d.ts",
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server -d --progress --colors",
