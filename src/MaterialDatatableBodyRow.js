@@ -7,14 +7,38 @@ import {withStyles} from "@material-ui/core/styles";
 const defaultBodyRowStyles = {
     root: {},
     responsiveStacked: {
-        "@media screen and (max-width: 960px)": {
-            border: "solid 2px rgba(0, 0, 0, 0.15)",
-        },
+      "@media screen and (max-width: 960px)": {
+        border: "solid 2px rgba(0, 0, 0, 0.15)",
+      },
     },
     cursorHover: {
-        '&:hover': {
-            cursor: 'pointer'
-        }
+      '&:hover': {
+        cursor: 'pointer'
+      }
+    },
+    rowDefault: {
+      '&:hover .overlay-content-wrapper:not(.is-hidden)': {
+        display: 'block',
+        visibility: 'visible'
+      }
+    },
+    overlayContentWrapper: {
+      display: 'none',
+      visibility: 'hidden',
+      position: 'relative',
+      zIndex: 1,
+    },
+    overlayContent: {
+      position: 'absolute',
+      right: 0,
+      top: 0,
+      zIndex: 10,
+      transform: 'translateY(-50%)',
+    },
+    noPadding: {
+      '&.MuiTableCell-root': {
+        padding: 0,
+      }
     }
 };
 
@@ -48,27 +72,8 @@ class MaterialDatatableBodyRow extends React.Component {
 
         return (
             <React.Fragment>
-                {
-                    options.useOnRowHoverOverlay &&
-                    this.state.isHover &&
-                    (
-                        <div
-                            style={{
-                                position: 'absolute',
-                            }}
-                            className="MuiTable-root"
-                            onMouseLeave={() => this.setState({
-                                isHover: false,
-                            })}
-                        >
-                            {options.onRowHoverOverlayRender(dataObject, rowIndex, data)}
-                        </div>
-                    )
-                }
+
                 <TableRow
-                    onMouseOver={() => this.setState({
-                        isHover: true,
-                    })}
                     hover={options.rowHover}
                     onClick={onClick}
                     className={classNames({
@@ -81,9 +86,31 @@ class MaterialDatatableBodyRow extends React.Component {
                         [classes.primary]: rowOptions.variant === 'primary',
                         [classes.secondary]: rowOptions.variant === 'secondary',
                         [classes.disable]: rowOptions.variant === 'disable',
+                        [classes.rowDefault]: true,
                     })}
                     selected={rowSelected}>
-                    {this.props.children}
+                        {this.props.children}
+                    {
+                        options.useOnRowHoverOverlay && (
+                            <td className={classNames({
+                              [classes.noPadding]: true,
+                              'MuiTableCell-root': true,
+                            })}>
+                                <div className={classNames({
+                                    [classes.overlayContentWrapper]: true,
+                                    'overlay-content-wrapper': true,
+                                    'is-hidden': true
+                                })}>
+                                    <div className={classNames({
+                                        [classes.overlayContent]: true,
+                                        'overlay-content': true,
+                                    })}>
+                                    {options.onRowHoverOverlayRender(dataObject, rowIndex, data)}
+                                </div>
+                                </div>
+                            </td>
+                        )
+                    }
                 </TableRow>
             </React.Fragment>
         );

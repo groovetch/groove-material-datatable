@@ -1,6 +1,6 @@
 {
   "name": "groove-material-datatable",
-  "version": "0.4.8",
+  "version": "0.5.7",
   "description": "Datatable for React using Material-UI",
   "main": "dist/index.js",
   "types": "index.d.ts",
@@ -20,7 +20,8 @@
     "coverage:html": "cross-env NODE_ENV=test nyc check-coverage --lines 55 --reporter=html --reporter=text mocha --require babel-register test/*.js && nyc report --reporter=html",
     "prettier": "find src/ docs/ test/ -type f -name \"*.js\" ! -path \"*/.next/*\"",
     "lint": "eslint src",
-    "build": "cross-env NODE_ENV=production npm run prettier && rollup -c"
+    "build": "cross-env NODE_ENV=production npm run prettier && rollup -c",
+    "build:dev": "cross-env NODE_ENV=development rollup -c"
   },
   "repository": {
     "type": "git",
@@ -90,6 +91,7 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "lodash.clonedeep": "^4.5.0",
+    "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "lodash.memoize": "^4.1.2",
     "lodash.merge": "^4.6.0",
