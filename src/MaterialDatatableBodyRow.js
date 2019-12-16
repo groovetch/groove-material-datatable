@@ -44,6 +44,7 @@ class MaterialDatatableBodyRow extends React.Component {
 
     render() {
         const {classes, options, rowSelected, onClick, dataObject, rowIndex, data} = this.props;
+        const rowOptions = dataObject.rowOptions || {};
 
         return (
             <React.Fragment>
@@ -74,6 +75,12 @@ class MaterialDatatableBodyRow extends React.Component {
                         [classes.root]: true,
                         [classes.cursorHover]: options.rowCursorHand,
                         [classes.responsiveStacked]: options.responsive === "stacked",
+                        [classes.info]: rowOptions.variant === 'info',
+                        [classes.warn]: rowOptions.variant === 'warn',
+                        [classes.error]: rowOptions.variant === 'error',
+                        [classes.primary]: rowOptions.variant === 'primary',
+                        [classes.secondary]: rowOptions.variant === 'secondary',
+                        [classes.disable]: rowOptions.variant === 'disable',
                     })}
                     selected={rowSelected}>
                     {this.props.children}
