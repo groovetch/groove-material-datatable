@@ -1598,6 +1598,12 @@ var MaterialDatatableBodyRow = function (_React$Component) {
                 rowIndex = _props.rowIndex,
                 data = _props.data;
 
+            var rowOptions = void 0;
+            if (dataObject) {
+                rowOptions = dataObject.rowOptions || {};
+            } else {
+                rowOptions = {};
+            }
 
             return React.createElement(
                 React.Fragment,
@@ -1607,7 +1613,7 @@ var MaterialDatatableBodyRow = function (_React$Component) {
                     {
                         hover: options.rowHover,
                         onClick: onClick,
-                        className: classNames((_classNames = {}, defineProperty(_classNames, classes.root, true), defineProperty(_classNames, classes.cursorHover, options.rowCursorHand), defineProperty(_classNames, classes.responsiveStacked, options.responsive === "stacked"), defineProperty(_classNames, classes.rowDefault, true), _classNames)),
+                        className: classNames((_classNames = {}, defineProperty(_classNames, classes.root, true), defineProperty(_classNames, classes.cursorHover, options.rowCursorHand), defineProperty(_classNames, classes.responsiveStacked, options.responsive === "stacked"), defineProperty(_classNames, classes.info, rowOptions.variant === 'info'), defineProperty(_classNames, classes.warn, rowOptions.variant === 'warn'), defineProperty(_classNames, classes.error, rowOptions.variant === 'error'), defineProperty(_classNames, classes.primary, rowOptions.variant === 'primary'), defineProperty(_classNames, classes.secondary, rowOptions.variant === 'secondary'), defineProperty(_classNames, classes.disable, rowOptions.variant === 'disable'), defineProperty(_classNames, classes.rowDefault, true), _classNames)),
                         selected: rowSelected },
                     this.props.children,
                     options.useOnRowHoverOverlay && React.createElement(

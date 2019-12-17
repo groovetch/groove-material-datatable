@@ -68,7 +68,12 @@ class MaterialDatatableBodyRow extends React.Component {
 
     render() {
         const {classes, options, rowSelected, onClick, dataObject, rowIndex, data} = this.props;
-        const rowOptions = dataObject.rowOptions || {};
+        let rowOptions;
+        if (dataObject) {
+          rowOptions = dataObject.rowOptions || {};
+        } else {
+          rowOptions = {};
+        }
 
         return (
             <React.Fragment>
