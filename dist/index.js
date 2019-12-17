@@ -1567,7 +1567,13 @@ var defaultBodyRowStyles = {
         '&.MuiTableCell-root': {
             padding: 0
         }
-    }
+    },
+    info: {},
+    warn: {},
+    error: {},
+    primary: {},
+    secondary: {},
+    disable: {}
 };
 
 var MaterialDatatableBodyRow = function (_React$Component) {
@@ -2499,7 +2505,8 @@ var MaterialDatatable$1 = function (_React$Component) {
                 var contentOffset = 125;
                 var row = table.querySelector('tr');
                 var overlayContent = table.querySelectorAll('.overlay-content-wrapper');
-                if (row && overlayContent) {
+
+                if (row && overlayContent && overlayContent.length === 1) {
                     var content = overlayContent[0].getBoundingClientRect();
                     var oneRow = row.getBoundingClientRect();
                     var tableDim = table.getBoundingClientRect();

@@ -207,7 +207,8 @@ class MaterialDatatable extends React.Component {
         const contentOffset = 125;
         const row = table.querySelector('tr');
         const overlayContent = table.querySelectorAll('.overlay-content-wrapper');
-        if (row && overlayContent) {
+
+        if (row && overlayContent && overlayContent.length === 1) {
           const content = overlayContent[0].getBoundingClientRect();
           const oneRow = row.getBoundingClientRect();
           const tableDim = table.getBoundingClientRect();

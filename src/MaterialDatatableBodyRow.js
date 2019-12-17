@@ -39,7 +39,13 @@ const defaultBodyRowStyles = {
       '&.MuiTableCell-root': {
         padding: 0,
       }
-    }
+    },
+    info: {},
+    warn: {},
+    error: {},
+    primary: {},
+    secondary: {},
+    disable: {},
 };
 
 class MaterialDatatableBodyRow extends React.Component {
